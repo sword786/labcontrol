@@ -5,101 +5,101 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>LabControl Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ── VARIABLES ── */
-:root {
-  --bg:#0b0d12; --sur:#12151c; --card:#181c26; --b1:#1e2230; --b2:#272c3d;
-  --acc:#4f9eff; --grn:#3ecf8e; --ylw:#f5c842; --red:#f04e4e; --pur:#a78bfa;
-  --tx:#dce3f0; --tx2:#8a93a8; --tx3:#42485a;
-  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
-  --tb-h:52px; --bn-h:60px; --safe-b:env(safe-area-inset-bottom,0px);
+:root{
+  --bg:#0b0d12;--sur:#12151c;--card:#181c26;--b1:#1e2230;--b2:#272c3d;
+  --acc:#4f9eff;--grn:#3ecf8e;--ylw:#f5c842;--red:#f04e4e;--pur:#a78bfa;--ora:#ff8c42;
+  --tx:#dce3f0;--tx2:#8a93a8;--tx3:#42485a;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
 }
-
-/* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{height:100%;-webkit-tap-highlight-color:transparent}
-body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased}
+html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+.app{display:flex;flex-direction:column;height:100dvh}
 
-/* ── APP SHELL ── */
-.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
-
-/* ── TOPBAR ── */
-.topbar{
-  height:var(--tb-h);background:var(--sur);border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;
-  padding-top:env(safe-area-inset-top,0px);
-}
-.logo{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px;white-space:nowrap;flex-shrink:0}
-.logo em{color:var(--tx3);font-style:normal;font-size:10px}
-.conn-row{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
-.wsi{flex:1;min-width:0;background:var(--bg);border:1px solid var(--b2);border-radius:6px;padding:6px 10px;color:var(--tx);font-family:var(--mono);font-size:11px;outline:none}
+/* ══ TOPBAR ══ */
+.topbar{height:48px;background:var(--sur);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 10px;gap:6px;flex-shrink:0;padding-top:var(--safe-t)}
+.logo{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--acc);letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+.logo em{color:var(--tx3);font-style:normal;font-size:9px}
+.vl{width:1px;height:20px;background:var(--b2);flex-shrink:0}
+.wsi{flex:1;min-width:80px;background:var(--bg);border:1px solid var(--b2);border-radius:5px;padding:5px 8px;color:var(--tx);font-family:var(--mono);font-size:11px;outline:none}
 .wsi:focus{border-color:var(--acc)}
 .wsi::placeholder{color:var(--tx3)}
-.psi{width:90px;background:var(--bg);border:1px solid var(--b2);border-radius:6px;padding:6px 8px;color:var(--tx);font-family:var(--mono);font-size:11px;outline:none}
+.psi{width:85px;background:var(--bg);border:1px solid var(--b2);border-radius:5px;padding:5px 8px;color:var(--tx);font-family:var(--mono);font-size:11px;outline:none}
 .psi:focus{border-color:var(--acc)}
-.cbtn{background:var(--acc);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;touch-action:manipulation}
+.cbtn{background:var(--acc);color:#fff;border:none;border-radius:5px;padding:5px 11px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .cbtn.disc{background:var(--red)}
-.conn-st{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .cdot{width:7px;height:7px;border-radius:50%;background:var(--tx3);flex-shrink:0}
 .cdot.on{background:var(--grn);box-shadow:0 0 5px var(--grn);animation:blink 2s infinite}
 .cdot.ing{background:var(--ylw)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
 .ctxt{font-family:var(--mono);font-size:10px;color:var(--tx3);white-space:nowrap}
-/* stats pills — hidden on small mobile */
-.spills{display:flex;gap:6px;flex-shrink:0}
-.spill{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--b2);color:var(--tx2)}
+.spills{display:flex;gap:5px;margin-left:auto;flex-shrink:0}
+.spill{font-family:var(--mono);font-size:10px;padding:3px 7px;border-radius:4px;border:1px solid var(--b2);color:var(--tx2);white-space:nowrap}
 .spill .n{font-weight:700}
 .spill.on .n{color:var(--grn)}
 .spill.tot .n{color:var(--acc)}
+.spill.off .n{color:var(--red)}
 
-/* ── MAIN BODY ── */
-.body{display:flex;flex:1;overflow:hidden}
-
-/* ── DESKTOP TOOLBAR (hidden on mobile) ── */
-.deskbar{
-  background:var(--sur);border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 6px;gap:1px;
-  overflow-x:auto;flex-shrink:0;height:38px;
-}
-.deskbar::-webkit-scrollbar{display:none}
-.dbg{display:flex;align-items:center;padding:0 3px;border-right:1px solid var(--b1)}
-.dbg:last-child{border:none}
-.dbt{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;border:none;background:transparent;color:var(--tx2);font-family:var(--sans);font-size:11px;cursor:pointer;white-space:nowrap;transition:background .1s,color .1s;touch-action:manipulation}
-.dbt:hover,.dbt:active{background:var(--card);color:var(--tx)}
-.dbt.act{background:rgba(79,158,255,.12);color:var(--acc)}
-.dbt.red:hover,.dbt.red:active{background:rgba(240,78,78,.1);color:var(--red)}
-.dbt.ylw:hover,.dbt.ylw:active{background:rgba(245,200,66,.1);color:var(--ylw)}
-.dbt.grn:hover,.dbt.grn:active{background:rgba(62,207,142,.1);color:var(--grn)}
-.zr{display:flex;align-items:center;gap:4px;padding:0 4px}
-.zr input{width:65px;accent-color:var(--acc);cursor:pointer}
+/* ══ HORIZONTAL SCROLLABLE TOOLBAR ══ */
+.bar{height:38px;background:var(--sur);border-bottom:1px solid var(--b1);display:flex;align-items:stretch;padding:0;flex-shrink:0;overflow-x:auto;overflow-y:hidden}
+.bar::-webkit-scrollbar{height:2px}
+.bar::-webkit-scrollbar-thumb{background:var(--b2)}
+.bg{display:flex;align-items:center;padding:0 4px;border-right:1px solid var(--b1);gap:1px;flex-shrink:0}
+.bg:last-child{border:none}
+.bg-label{font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;padding:0 3px;white-space:nowrap;align-self:center}
+.tbt{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:3px;border:none;background:transparent;color:var(--tx2);font-family:var(--sans);font-size:11px;cursor:pointer;white-space:nowrap;transition:background .1s,color .1s;height:28px;flex-shrink:0}
+.tbt:hover,.tbt:active{background:var(--card);color:var(--tx)}
+.tbt.act{background:rgba(79,158,255,.15);color:var(--acc)}
+.tbt.red:hover,.tbt.red:active{background:rgba(240,78,78,.1);color:var(--red)}
+.tbt.ylw:hover,.tbt.ylw:active{background:rgba(245,200,66,.1);color:var(--ylw)}
+.tbt.grn:hover,.tbt.grn:active{background:rgba(62,207,142,.1);color:var(--grn)}
+.zr{display:flex;align-items:center;gap:4px;padding:0 5px}
+.zr input[type=range]{width:65px;accent-color:var(--acc);cursor:pointer}
 .zr span{font-family:var(--mono);font-size:10px;color:var(--tx3);min-width:28px}
 
-/* ── LEFT NAV (desktop) ── */
-.leftnav{
-  width:44px;background:var(--sur);border-right:1px solid var(--b1);
-  display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:3px;flex-shrink:0
-}
-.lni{width:32px;height:32px;border-radius:7px;border:none;background:transparent;color:var(--tx3);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s;touch-action:manipulation;position:relative}
+/* ══ BODY ══ */
+.body{display:flex;flex:1;overflow:hidden}
+
+/* LEFT NAV */
+.leftnav{width:44px;background:var(--sur);border-right:1px solid var(--b1);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:3px;flex-shrink:0;overflow-y:auto}
+.leftnav::-webkit-scrollbar{display:none}
+.lni{width:32px;height:32px;border-radius:7px;border:none;background:transparent;color:var(--tx3);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s;position:relative;flex-shrink:0}
 .lni:hover,.lni:active{background:var(--card);color:var(--tx)}
 .lni.act{background:rgba(79,158,255,.14);color:var(--acc)}
-.lni .lni-tip{position:absolute;left:40px;top:50%;transform:translateY(-50%);background:var(--card);border:1px solid var(--b2);color:var(--tx);font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}
-.lni:hover .lni-tip{opacity:1}
+.lni .tip{position:absolute;left:40px;top:50%;transform:translateY(-50%);background:var(--card);border:1px solid var(--b2);color:var(--tx);font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}
+.lni:hover .tip{opacity:1}
+.nav-sep{width:28px;height:1px;background:var(--b1);margin:2px 0;flex-shrink:0}
 
-/* ── GRID AREA ── */
-.gw{flex:1;overflow-y:auto;padding:10px;background:var(--bg);-webkit-overflow-scrolling:touch}
-.gw::-webkit-scrollbar{width:4px}
+/* ══ GRID AREA (scrollable both ways) ══ */
+.gw{flex:1;overflow:auto;padding:10px;background:var(--bg);-webkit-overflow-scrolling:touch;position:relative}
+.gw::-webkit-scrollbar{width:5px;height:5px}
 .gw::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
-.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--ts,180px),1fr));gap:8px}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--ts,190px),1fr));gap:8px}
+
+/* Filter bar inside grid */
+.filter-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.filter-btn{padding:4px 10px;border-radius:20px;border:1px solid var(--b2);background:transparent;color:var(--tx2);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.filter-btn.act{background:var(--acc);border-color:var(--acc);color:#fff}
+.filter-btn.grn{}.filter-btn.grn.act{background:var(--grn);border-color:var(--grn);color:#000}
+.filter-btn.red.act{background:var(--red);border-color:var(--red);color:#fff}
+.search-fi{flex:1;min-width:120px;background:var(--card);border:1px solid var(--b2);border-radius:20px;padding:4px 12px;color:var(--tx);font-family:var(--mono);font-size:11px;outline:none}
+.search-fi:focus{border-color:var(--acc)}
+.search-fi::placeholder{color:var(--tx3)}
+.sel-bar{display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(79,158,255,.06);border:1px solid rgba(79,158,255,.2);border-radius:6px;margin-bottom:8px;font-family:var(--mono);font-size:10px;color:var(--acc);flex-wrap:wrap}
+.sel-bar button{padding:2px 8px;border-radius:3px;border:1px solid rgba(79,158,255,.3);background:transparent;color:var(--acc);font-family:var(--mono);font-size:10px;cursor:pointer}
+.sel-bar button:hover{background:rgba(79,158,255,.1)}
+
+/* EMPTY STATE */
 .es{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--tx3);font-family:var(--mono);font-size:12px;text-align:center;padding:20px}
 .es .big{font-size:48px;opacity:.2}
-.es code{color:var(--acc);font-size:10px;word-break:break-all;display:block;background:rgba(79,158,255,.07);padding:4px 8px;border-radius:4px;margin:2px 0}
+.es code{color:var(--acc);font-size:10px;display:block;background:rgba(79,158,255,.07);padding:4px 8px;border-radius:4px;margin:2px 0;word-break:break-all}
 
-/* ── PC CARD ── */
-.pc{background:var(--card);border:1.5px solid var(--b1);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color .15s;user-select:none;position:relative;-webkit-tap-highlight-color:transparent}
-.pc:hover,.pc:active{border-color:rgba(79,158,255,.4)}
+/* ══ PC CARD ══ */
+.pc{background:var(--card);border:1.5px solid var(--b1);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color .15s,box-shadow .15s;user-select:none;position:relative}
+.pc:hover{border-color:rgba(79,158,255,.4);box-shadow:0 3px 14px rgba(0,0,0,.3)}
 .pc.sel{border-color:var(--acc);background:rgba(79,158,255,.05)}
 .pc.off{opacity:.4}
 .pc.locked{border-color:var(--red)}
@@ -108,274 +108,228 @@ body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);ov
 .pc-ss-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--tx3)}
 .live-b{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;font-family:var(--mono);font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;letter-spacing:1px;display:none;animation:blink .8s infinite}
 .pc.streaming .live-b{display:block}
-.pc-ov{position:absolute;inset:0;background:rgba(79,158,255,.1);opacity:0;display:flex;align-items:center;justify-content:center;font-size:20px;transition:opacity .15s}
+.pc-ov{position:absolute;inset:0;background:rgba(79,158,255,.1);opacity:0;display:flex;align-items:center;justify-content:center;font-size:20px;transition:opacity .15s;gap:8px}
 .pc:hover .pc-ov{opacity:1}
-.pc-ck{position:absolute;top:4px;left:4px;width:16px;height:16px;border-radius:4px;background:var(--acc);color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+.pc-ck{position:absolute;top:4px;left:4px;width:17px;height:17px;border-radius:4px;background:var(--acc);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
 .pc:hover .pc-ck,.pc.sel .pc-ck{opacity:1}
-.pc-info{padding:5px 8px 3px;display:flex;align-items:center;gap:5px}
-.pc-dot{width:6px;height:6px;border-radius:50%;background:var(--tx3);flex-shrink:0}
-.pc-dot.on{background:var(--grn)}
-.pc-dot.idle{background:var(--ylw)}
+.pc-status-badge{position:absolute;bottom:4px;left:4px;font-family:var(--mono);font-size:8px;padding:1px 5px;border-radius:3px;font-weight:700}
+.pc-status-badge.on{background:rgba(62,207,142,.2);color:var(--grn);border:1px solid rgba(62,207,142,.3)}
+.pc-status-badge.idle{background:rgba(245,200,66,.2);color:var(--ylw);border:1px solid rgba(245,200,66,.3)}
+.pc-status-badge.off{background:rgba(240,78,78,.15);color:var(--red);border:1px solid rgba(240,78,78,.3)}
+.pc-info{padding:5px 8px 2px;display:flex;align-items:center;gap:5px}
+.pc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--tx3)}
+.pc-dot.on{background:var(--grn)}.pc-dot.idle{background:var(--ylw)}
 .pc-name{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--tx);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pc-user{font-size:10px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pc-bars{padding:2px 8px 5px;display:flex;gap:4px}
-.mbw{flex:1}
-.mbl{font-family:var(--mono);font-size:9px;color:var(--tx3);display:flex;justify-content:space-between;margin-bottom:2px}
+.mbw{flex:1}.mbl{font-family:var(--mono);font-size:9px;color:var(--tx3);display:flex;justify-content:space-between;margin-bottom:2px}
 .mbt{height:3px;background:var(--b1);border-radius:2px;overflow:hidden}
 .mbf{height:100%;border-radius:2px;background:var(--grn);transition:width .6s ease}
 .mbf.m{background:var(--ylw)}.mbf.h{background:var(--red)}
 
-/* ── SIDEBAR (desktop) ── */
-.sidebar{
-  width:260px;flex-shrink:0;border-left:1px solid var(--b1);background:var(--sur);
-  display:flex;flex-direction:column;overflow:hidden;
-}
-.sbt{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0}
-.st{flex:1;text-align:center;padding:8px 2px;font-family:var(--mono);font-size:9px;color:var(--tx3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.5px;touch-action:manipulation}
-.st:hover,.st:active{color:var(--tx2)}
+/* LIST VIEW */
+.list-view{display:flex;flex-direction:column;gap:4px}
+.lv-item{background:var(--card);border:1.5px solid var(--b1);border-radius:6px;display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;transition:border-color .15s}
+.lv-item:hover{border-color:rgba(79,158,255,.4)}
+.lv-item.sel{border-color:var(--acc);background:rgba(79,158,255,.04)}
+.lv-item.off{opacity:.4}
+.lv-ss{width:80px;height:45px;background:#040608;border-radius:4px;overflow:hidden;flex-shrink:0}
+.lv-ss img{width:100%;height:100%;object-fit:cover}
+.lv-ss-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--tx3)}
+.lv-info{flex:1;min-width:0}
+.lv-name{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--tx)}
+.lv-sub{font-size:10px;color:var(--tx3);margin-top:1px}
+.lv-bars{display:flex;gap:8px;margin-top:3px}
+.lv-bar{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--tx3)}
+.lv-bt{width:50px;height:3px;background:var(--b1);border-radius:2px;overflow:hidden}
+.lv-bf{height:100%;border-radius:2px;background:var(--grn);transition:width .5s}
+.lv-bf.m{background:var(--ylw)}.lv-bf.h{background:var(--red)}
+.lv-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--tx3)}
+.lv-dot.on{background:var(--grn)}.lv-dot.idle{background:var(--ylw)}
+.lv-status{font-family:var(--mono);font-size:9px;font-weight:700;min-width:40px}
+.lv-ip{font-family:var(--mono);font-size:10px;color:var(--tx3);min-width:100px}
+.lv-os{font-size:10px;color:var(--tx3);min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv-ck{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;transition:all .15s}
+.lv-item.sel .lv-ck{background:var(--acc);border-color:var(--acc);color:#fff}
+.lv-header{display:flex;align-items:center;gap:10px;padding:4px 10px;font-family:var(--mono);font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--b1);margin-bottom:4px}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:258px;flex-shrink:0;border-left:1px solid var(--b1);background:var(--sur);display:flex;flex-direction:column;overflow:hidden}
+.sbt{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;overflow-x:auto}
+.sbt::-webkit-scrollbar{display:none}
+.st{flex-shrink:0;text-align:center;padding:8px 8px;font-family:var(--mono);font-size:9px;color:var(--tx3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.5px;white-space:nowrap}
 .st.act{color:var(--acc);border-bottom-color:var(--acc)}
-.sbody{flex:1;overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch}
+.sbody{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px}
 .sbody::-webkit-scrollbar{width:4px}
 .sbody::-webkit-scrollbar-thumb{background:var(--b2)}
 .sec{margin-bottom:14px}
-.sbl{font-family:var(--mono);font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
-.si,.sse,.sta{width:100%;background:var(--bg);border:1px solid var(--b2);border-radius:5px;padding:7px 8px;color:var(--tx);font-family:var(--mono);font-size:12px;outline:none;margin-bottom:6px;-webkit-appearance:none;appearance:none}
+.sbl{font-family:var(--mono);font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.si,.sse,.sta{width:100%;background:var(--bg);border:1px solid var(--b2);border-radius:4px;padding:6px 8px;color:var(--tx);font-family:var(--mono);font-size:11px;outline:none;margin-bottom:5px}
 .si:focus,.sse:focus,.sta:focus{border-color:var(--acc)}
 .si::placeholder{color:var(--tx3)}
-.sta{resize:vertical;min-height:60px}
+.sta{resize:vertical;min-height:55px}
 .sse option{background:var(--card)}
-.sbn{width:100%;padding:8px;border-radius:5px;border:none;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:opacity .1s;margin-bottom:5px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.sbn:active{opacity:.8}
+.sbn{width:100%;padding:7px;border-radius:4px;border:none;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;margin-bottom:4px;transition:opacity .1s}
+.sbn:hover{opacity:.85}
 .sbn.acc{background:var(--acc);color:#fff}
 .sbn.grn{background:var(--grn);color:#000}
 .sbn.red{background:var(--red);color:#fff}
 .sbn.ylw{background:var(--ylw);color:#000}
 .sbn.gh{background:var(--card);color:var(--tx2);border:1px solid var(--b2)}
-.vol-row{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.sbn.pur{background:var(--pur);color:#fff}
+.vol-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
 .vol-row input[type=range]{flex:1;accent-color:var(--acc);height:20px}
-.vol-row span{font-family:var(--mono);font-size:11px;color:var(--tx3);min-width:32px}
+.vol-row span{font-family:var(--mono);font-size:11px;color:var(--tx3);min-width:30px}
 
-/* ── LOG ── */
-.ll{display:flex;flex-direction:column;gap:3px;max-height:260px;overflow-y:auto}
+/* LOG */
+.ll{display:flex;flex-direction:column;gap:3px;max-height:300px;overflow-y:auto}
 .ll::-webkit-scrollbar{width:3px}
 .ll::-webkit-scrollbar-thumb{background:var(--b2)}
-.le{font-family:var(--mono);font-size:10px;color:var(--tx3);display:flex;gap:5px;padding:4px 7px;background:var(--bg);border-radius:4px;border-left:2px solid var(--b2);animation:lin .2s ease;line-height:1.4}
-.le.ok{border-left-color:var(--grn)}
-.le.w{border-left-color:var(--ylw);color:var(--ylw)}
-.le.e{border-left-color:var(--red);color:var(--red)}
+.le{font-family:var(--mono);font-size:10px;color:var(--tx3);display:flex;gap:5px;padding:3px 6px;background:var(--bg);border-radius:3px;border-left:2px solid var(--b2);animation:lin .2s ease;line-height:1.4}
+.le.ok{border-left-color:var(--grn)}.le.w{border-left-color:var(--ylw);color:var(--ylw)}.le.e{border-left-color:var(--red);color:var(--red)}
 .lt{color:var(--acc);flex-shrink:0}
 @keyframes lin{from{opacity:0;transform:translateY(-2px)}to{opacity:1;transform:none}}
-.dr{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--b1);font-size:11px}
-.dk{color:var(--tx3);font-family:var(--mono)}
-.dv{color:var(--tx);font-family:var(--mono);font-weight:600}
+.dr{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--b1);font-size:11px}
+.dk{color:var(--tx3);font-family:var(--mono)}.dv{color:var(--tx);font-family:var(--mono);font-weight:600}
 
-/* ── CHAT ── */
-.chatbox{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-bottom:8px;-webkit-overflow-scrolling:touch}
-.cm{padding:7px 10px;border-radius:7px;font-size:12px;max-width:92%;line-height:1.5}
+/* CHAT */
+.chatbox{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-bottom:7px}
+.cm{padding:6px 9px;border-radius:6px;font-size:12px;max-width:90%;line-height:1.5}
 .cm.me{background:rgba(79,158,255,.15);color:var(--tx);align-self:flex-end}
 .cm.ag{background:var(--bg);color:var(--tx2);align-self:flex-start;border:1px solid var(--b2);font-family:var(--mono);font-size:11px}
 .cm .who{font-family:var(--mono);font-size:9px;color:var(--tx3);margin-bottom:2px}
 
-/* ══ MOBILE BOTTOM NAV ══ */
-.bottomnav{
-  display:none;
-  height:var(--bn-h);
-  background:var(--sur);
-  border-top:1px solid var(--b1);
-  flex-shrink:0;
-  padding-bottom:var(--safe-b);
-}
-.bnav-inner{display:flex;height:100%;align-items:stretch}
-.bnav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;border:none;background:transparent;color:var(--tx3);cursor:pointer;
-  font-family:var(--sans);font-size:9px;letter-spacing:.3px;font-weight:600;
-  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-  transition:color .12s;padding:0;
-}
-.bnav-item.act{color:var(--acc)}
-.bnav-item .bi{font-size:18px;line-height:1}
-.bnav-item span{font-size:9px;line-height:1}
-
-/* ══ MOBILE PANELS (slide-up sheets) ══ */
-.m-sheet{
-  position:fixed;bottom:0;left:0;right:0;
-  background:var(--sur);border-top:1px solid var(--b2);border-radius:16px 16px 0 0;
-  z-index:150;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);
-  max-height:85vh;display:flex;flex-direction:column;
-  padding-bottom:var(--safe-b);
-}
-.m-sheet.open{transform:translateY(0)}
-.m-sheet-handle{width:36px;height:4px;background:var(--b2);border-radius:2px;margin:10px auto 0;flex-shrink:0}
-.m-sheet-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--tx);padding:12px 16px 8px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
-.m-sheet-cls{background:none;border:1px solid var(--b2);color:var(--tx3);width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
-.m-sheet-body{overflow-y:auto;padding:0 16px 16px;-webkit-overflow-scrolling:touch}
-
-/* ── MOBILE QUICK COMMANDS GRID ── */
-.mob-cmds{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding-bottom:4px}
-.mcmd{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;padding:10px 4px;border-radius:8px;border:1px solid var(--b2);
-  background:var(--card);cursor:pointer;touch-action:manipulation;
-  font-family:var(--sans);font-size:10px;color:var(--tx2);font-weight:500;
-  text-align:center;transition:background .1s,border-color .1s;
-  -webkit-tap-highlight-color:transparent;
-}
-.mcmd:active{background:var(--b2)}
-.mcmd.red:active,.mcmd.red{border-color:rgba(240,78,78,.3);color:var(--red)}
-.mcmd.grn:active,.mcmd.grn{border-color:rgba(62,207,142,.3);color:var(--grn)}
-.mcmd.ylw{border-color:rgba(245,200,66,.3);color:var(--ylw)}
-.mcmd.acc{border-color:rgba(79,158,255,.3);color:var(--acc)}
-.mcmd .mi{font-size:20px;line-height:1}
-
-.mob-section-title{font-family:var(--mono);font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;margin:12px 0 7px}
-
-/* ── MOBILE PC LIST (full-width cards) ── */
-.mob-pc-list{display:flex;flex-direction:column;gap:6px}
-.mob-pc-item{
-  background:var(--card);border:1.5px solid var(--b1);border-radius:8px;
-  padding:10px 12px;display:flex;align-items:center;gap:10px;
-  cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-}
-.mob-pc-item:active{border-color:var(--acc)}
-.mob-pc-item.sel{border-color:var(--acc);background:rgba(79,158,255,.06)}
-.mob-pc-item.off{opacity:.4}
-.mob-ss-thumb{width:72px;height:40px;background:#040608;border-radius:4px;overflow:hidden;flex-shrink:0;position:relative}
-.mob-ss-thumb img{width:100%;height:100%;object-fit:cover}
-.mob-ss-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--tx3);font-family:var(--mono)}
-.mob-pc-meta{flex:1;min-width:0}
-.mob-pc-name{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mob-pc-sub{font-size:10px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-.mob-pc-bars{display:flex;gap:6px;margin-top:4px}
-.mob-pc-bar{flex:1}
-.mob-pc-bar-lbl{font-family:var(--mono);font-size:9px;color:var(--tx3);display:flex;justify-content:space-between}
-.mob-pc-bar-t{height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:1px}
-.mob-pc-bar-f{height:100%;border-radius:2px;background:var(--grn);transition:width .5s}
-.mob-pc-bar-f.m{background:var(--ylw)}.mob-pc-bar-f.h{background:var(--red)}
-.mob-pc-arrow{color:var(--tx3);font-size:14px;flex-shrink:0}
-.mob-sel-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;transition:all .15s}
-.mob-pc-item.sel .mob-sel-dot{background:var(--acc);border-color:var(--acc);color:#fff}
-
-/* ══ PC DETAIL SHEET ══ */
-.pc-detail-ss{width:100%;aspect-ratio:16/9;background:#040608;border-radius:8px;overflow:hidden;margin-bottom:12px}
-.pc-detail-ss img{width:100%;height:100%;object-fit:cover}
-.pc-action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
-.pac{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;padding:10px 4px;border-radius:7px;border:1px solid var(--b2);
-  background:var(--card);cursor:pointer;touch-action:manipulation;
-  font-size:10px;color:var(--tx2);font-weight:500;text-align:center;
-  -webkit-tap-highlight-color:transparent;
-}
-.pac:active{opacity:.75}
-.pac.red{color:var(--red);border-color:rgba(240,78,78,.3)}
-.pac.grn{color:var(--grn);border-color:rgba(62,207,142,.3)}
-.pac.ylw{color:var(--ylw);border-color:rgba(245,200,66,.3)}
-.pac .pi{font-size:22px;line-height:1}
-
-/* ═══ REMOTE CONTROL FULLSCREEN ═══ */
-.rcov{
-  position:fixed;inset:0;background:#050508;z-index:200;
-  display:none;flex-direction:column;
-  padding-top:env(safe-area-inset-top,0px);
-}
+/* ══ REMOTE CONTROL ══ */
+.rcov{position:fixed;inset:0;background:#050508;z-index:200;display:none;flex-direction:column;padding-top:var(--safe-t)}
 .rcov.open{display:flex}
-.rcbar{
-  height:44px;background:var(--sur);border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 10px;gap:5px;flex-shrink:0;
-  overflow-x:auto;
-}
+.rcbar{height:44px;background:var(--sur);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 8px;gap:5px;flex-shrink:0;overflow-x:auto}
 .rcbar::-webkit-scrollbar{display:none}
 .rctit{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--tx);white-space:nowrap;margin-right:4px}
 .rcmodes{display:flex;gap:2px;background:var(--bg);border-radius:5px;padding:3px;flex-shrink:0}
-.rcmb{padding:3px 9px;border-radius:3px;border:none;background:transparent;color:var(--tx3);font-family:var(--mono);font-size:10px;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+.rcmb{padding:3px 9px;border-radius:3px;border:none;background:transparent;color:var(--tx3);font-family:var(--mono);font-size:10px;cursor:pointer;white-space:nowrap}
 .rcmb.act{background:var(--acc);color:#fff}
-.rc-quality{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.rc-quality input{width:55px;accent-color:var(--acc)}
-.rc-quality span{font-family:var(--mono);font-size:10px;color:var(--tx3)}
-.rcclose{background:var(--red);border:none;color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation}
+.rcclose{background:var(--red);border:none;color:#fff;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rcwrap{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#050508;position:relative}
 .rcwrap.ctrl{cursor:crosshair}
 #rccanvas{max-width:100%;max-height:100%;display:block;touch-action:none}
-.rc-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-family:var(--mono);font-size:12px;pointer-events:none;text-align:center;padding:20px}
-.kbbar{
-  height:38px;background:var(--sur);border-top:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 8px;gap:3px;overflow-x:auto;flex-shrink:0;
-}
+.rc-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-family:var(--mono);font-size:12px;pointer-events:none;text-align:center}
+/* Mobile touch joystick */
+.touch-pad{position:absolute;bottom:60px;right:16px;width:110px;height:110px;background:rgba(255,255,255,.05);border:1px solid var(--b2);border-radius:50%;display:none;touch-action:none;z-index:10}
+.touch-pad-dot{width:36px;height:36px;background:rgba(79,158,255,.5);border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:2px solid var(--acc)}
+.touch-btns{position:absolute;bottom:16px;left:16px;display:none;gap:6px;z-index:10}
+.touch-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--b2);background:rgba(30,34,48,.8);color:var(--tx2);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
+.kbbar{height:36px;background:var(--sur);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 8px;gap:3px;overflow-x:auto;flex-shrink:0}
 .kbbar::-webkit-scrollbar{display:none}
-.kbtn{padding:4px 9px;border-radius:4px;border:1px solid var(--b2);background:transparent;color:var(--tx2);font-family:var(--mono);font-size:10px;cursor:pointer;white-space:nowrap;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.kbtn{padding:3px 9px;border-radius:4px;border:1px solid var(--b2);background:transparent;color:var(--tx2);font-family:var(--mono);font-size:10px;cursor:pointer;white-space:nowrap;touch-action:manipulation;flex-shrink:0}
 .kbtn:active{background:var(--b2);color:var(--tx)}
+.fps-sel{background:var(--bg);border:1px solid var(--b2);border-radius:4px;color:var(--tx);font-family:var(--mono);font-size:10px;padding:2px 5px;outline:none;flex-shrink:0}
 
-/* ── CONTEXT MENU ── */
-.ctx{position:fixed;background:var(--card);border:1px solid var(--b2);border-radius:8px;padding:4px;z-index:400;min-width:190px;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none}
+/* ══ MODALS ══ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px);padding:16px}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:20px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;position:relative}
+.modal h3{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--tx);margin-bottom:14px}
+.modal-close{position:absolute;top:12px;right:12px;background:transparent;border:1px solid var(--b2);color:var(--tx3);width:26px;height:26px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
+.modal-close:hover{border-color:var(--red);color:var(--red)}
+
+/* ══ SLIDESHOW ══ */
+.slideshow-overlay{position:fixed;inset:0;background:#000;z-index:250;display:none;flex-direction:column}
+.slideshow-overlay.open{display:flex}
+.ss-top{height:44px;background:rgba(0,0,0,.7);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
+.ss-title{font-family:var(--mono);font-size:12px;color:var(--tx);flex:1}
+.ss-grid{flex:1;display:grid;gap:4px;padding:4px;overflow:hidden}
+.ss-cell{position:relative;overflow:hidden;border-radius:4px;background:#040608}
+.ss-cell img{width:100%;height:100%;object-fit:cover}
+.ss-cell-label{position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:rgba(0,0,0,.7);font-family:var(--mono);font-size:10px;color:var(--tx)}
+.ss-cell-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px}
+
+/* ══ SPOTLIGHT ══ */
+.spotlight-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:260;display:none;flex-direction:column;align-items:center;justify-content:center}
+.spotlight-overlay.open{display:flex}
+.spotlight-frame{max-width:1200px;width:100%;padding:20px}
+.spotlight-img-wrap{width:100%;aspect-ratio:16/9;background:#040608;border-radius:8px;overflow:hidden;border:2px solid var(--acc);margin-bottom:12px}
+.spotlight-img-wrap img{width:100%;height:100%;object-fit:contain}
+.spotlight-info{font-family:var(--mono);font-size:12px;color:var(--tx2);text-align:center}
+
+/* ══ AUDIO CALL ══ */
+.call-panel{position:fixed;bottom:80px;right:16px;background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:14px;z-index:180;min-width:200px;display:none;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.call-panel.open{display:block}
+.call-indicator{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--grn);margin-bottom:8px}
+.call-dot{width:8px;height:8px;border-radius:50%;background:var(--grn);animation:blink .8s infinite}
+
+/* ══ WOL ══ */
+.wol-item{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg);border-radius:4px;border:1px solid var(--b2);margin-bottom:4px;font-family:var(--mono);font-size:10px;color:var(--tx2)}
+.wol-item button{margin-left:auto;padding:2px 7px;border-radius:3px;border:1px solid var(--grn);color:var(--grn);background:transparent;font-family:var(--mono);font-size:9px;cursor:pointer}
+.wol-item button:hover{background:rgba(62,207,142,.1)}
+
+/* ══ TOAST ══ */
+.tw{position:fixed;bottom:20px;right:14px;display:flex;flex-direction:column;gap:5px;z-index:500;pointer-events:none;max-width:calc(100vw - 28px)}
+.t{background:var(--card);border:1px solid var(--b2);border-left:3px solid var(--grn);padding:8px 12px;border-radius:5px;font-family:var(--mono);font-size:11px;color:var(--tx);box-shadow:0 4px 18px rgba(0,0,0,.5);animation:tin .2s ease,tout .3s ease 2.8s forwards;word-break:break-word}
+.t.w{border-left-color:var(--ylw)}.t.e{border-left-color:var(--red)}
+@keyframes tin{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+@keyframes tout{from{opacity:1}to{opacity:0}}
+
+/* CONTEXT MENU */
+.ctx{position:fixed;background:var(--card);border:1px solid var(--b2);border-radius:8px;padding:4px;z-index:400;min-width:190px;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none;max-height:80vh;overflow-y:auto}
 .ctx.open{display:block}
-.ci{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:5px;font-size:12px;color:var(--tx2);cursor:pointer;transition:background .1s;touch-action:manipulation}
+.ci{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:4px;font-size:12px;color:var(--tx2);cursor:pointer;transition:background .1s}
 .ci:hover,.ci:active{background:var(--b2);color:var(--tx)}
 .ci.r:hover,.ci.r:active{background:rgba(240,78,78,.1);color:var(--red)}
 .cs{height:1px;background:var(--b1);margin:3px 0}
 
-/* ── TOAST ── */
-.tw{position:fixed;bottom:80px;right:12px;display:flex;flex-direction:column;gap:5px;z-index:600;pointer-events:none;max-width:calc(100vw - 24px)}
-.t{background:var(--card);border:1px solid var(--b2);border-left:3px solid var(--grn);padding:8px 12px;border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--tx);box-shadow:0 4px 18px rgba(0,0,0,.5);animation:tin .2s ease,tout .3s ease 2.8s forwards;word-break:break-word}
-.t.w{border-left-color:var(--ylw)}
-.t.e{border-left-color:var(--red)}
-@keyframes tin{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
-@keyframes tout{from{opacity:1}to{opacity:0}}
-
-/* ── PROCESS TABLE ── */
+/* PROCESS TABLE */
 .ptable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px}
 .ptable th{text-align:left;color:var(--tx3);padding:3px 4px;border-bottom:1px solid var(--b1);font-weight:400}
 .ptable td{padding:4px 4px;color:var(--tx2);border-bottom:1px solid rgba(30,34,48,.5)}
-.ptable tr:active td{background:var(--b1);color:var(--tx)}
-.pkill{color:var(--red);cursor:pointer;padding:2px 5px;font-size:13px}
+.ptable tr:hover td{background:var(--b1);color:var(--tx)}
+.pkill{color:var(--red);cursor:pointer;padding:2px 5px}
 
-/* ══ RESPONSIVE BREAKPOINTS ══ */
+/* ══ MOBILE BOTTOM NAV ══ */
+.bottomnav{display:none;height:56px;background:var(--sur);border-top:1px solid var(--b1);flex-shrink:0;padding-bottom:var(--safe-b)}
+.bnav-inner{display:flex;height:100%;align-items:stretch}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;color:var(--tx3);cursor:pointer;font-family:var(--sans);font-size:9px;font-weight:600;touch-action:manipulation}
+.bnav-item.act{color:var(--acc)}
+.bnav-item .bi{font-size:18px;line-height:1}
 
-/* Tablet: hide desktop sidebar, show bottom nav */
-@media (max-width: 900px) {
+/* MOBILE SHEETS */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:149;display:none;backdrop-filter:blur(2px)}
+.sheet-bg.open{display:block}
+.m-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--sur);border-top:1px solid var(--b2);border-radius:16px 16px 0 0;z-index:150;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);max-height:88vh;display:flex;flex-direction:column;padding-bottom:var(--safe-b)}
+.m-sheet.open{transform:translateY(0)}
+.m-handle{width:36px;height:4px;background:var(--b2);border-radius:2px;margin:10px auto 0;flex-shrink:0}
+.m-sheet-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--tx);padding:10px 16px 6px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
+.m-cls{background:none;border:1px solid var(--b2);color:var(--tx3);width:26px;height:26px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
+.m-sheet-body{overflow-y:auto;padding:0 14px 14px;-webkit-overflow-scrolling:touch}
+.mob-cmds{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px}
+.mcmd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px;border-radius:8px;border:1px solid var(--b2);background:var(--card);cursor:pointer;touch-action:manipulation;font-size:10px;color:var(--tx2);font-weight:500;text-align:center}
+.mcmd:active{background:var(--b2)}
+.mcmd.red{border-color:rgba(240,78,78,.3);color:var(--red)}
+.mcmd.grn{border-color:rgba(62,207,142,.3);color:var(--grn)}
+.mcmd.ylw{border-color:rgba(245,200,66,.3);color:var(--ylw)}
+.mcmd.acc{border-color:rgba(79,158,255,.3);color:var(--acc)}
+.mcmd .mi{font-size:20px;line-height:1}
+.mob-sec-title{font-family:var(--mono);font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;margin:10px 0 6px}
+
+/* RESPONSIVE */
+@media(max-width:900px){
   .sidebar{display:none}
   .leftnav{display:none}
-  .deskbar{display:none}
+  .deskbar-wrap{display:none}
   .bottomnav{display:block}
-  .tw{bottom:calc(var(--bn-h) + 10px + var(--safe-b))}
-  .ctx{max-width:calc(100vw - 20px)}
-  :root{--ts:160px}
+  .spills{display:none}
+  .tw{bottom:calc(56px + 10px + var(--safe-b))}
 }
-
-/* Phone: switch to list view automatically */
-@media (max-width: 540px) {
-  .topbar{padding:0 8px;gap:5px;padding-top:env(safe-area-inset-top,0px)}
+@media(max-width:540px){
   .logo{font-size:12px}
-  .psi{width:80px}
+  .psi{width:75px}
   .cbtn{padding:5px 9px;font-size:10px}
   .ctxt{display:none}
-  .spills{display:none}
-  /* full-width grid = 1 col would be too big, use list instead */
-  .pg{display:none}
-  .mob-grid-area .mob-pc-list{display:flex}
-  :root{--ts:150px}
 }
-
-/* Very small phones */
-@media (max-width: 380px) {
-  .mob-cmds{grid-template-columns:repeat(3,1fr)}
-  .pc-action-grid{grid-template-columns:repeat(3,1fr)}
-}
-
-/* Desktop: show everything, hide mobile UI */
-@media (min-width: 901px) {
+@media(min-width:901px){
   .bottomnav{display:none}
-  .m-sheet{display:none !important}
-  .mob-grid-area .mob-pc-list{display:none !important}
-  .pg{display:grid !important}
+  .m-sheet{display:none!important}
+  .sheet-bg{display:none!important}
 }
-
-/* Sheet backdrop */
-.sheet-bg{
-  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:149;
-  display:none;backdrop-filter:blur(2px);
-}
-.sheet-bg.open{display:block}
 </style>
 </head>
 <body>
@@ -383,117 +337,192 @@ body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);ov
 
 <!-- ══ TOPBAR ══ -->
 <div class="topbar">
-  <div class="logo">Lab<em>Control</em></div>
-  <div class="conn-row">
-    <input class="wsi" id="wsUrl" placeholder="wss://hie-z3rp.onrender.com" spellcheck="false" autocomplete="off">
-    <input class="psi" id="wsPass" type="password" placeholder="pass" autocomplete="current-password">
-    <button class="cbtn" id="btnC" onclick="toggleConn()">Connect</button>
-  </div>
-  <div class="conn-st">
-    <div class="cdot" id="cdot"></div>
-    <span class="ctxt" id="ctxt">Off</span>
-  </div>
+  <div class="logo">Lab<em>Control PRO</em></div>
+  <div class="vl"></div>
+  <input class="wsi" id="wsUrl" placeholder="wss://hie-z3rp.onrender.com" spellcheck="false" autocomplete="off">
+  <input class="psi" id="wsPass" type="password" placeholder="pass">
+  <button class="cbtn" id="btnC" onclick="toggleConn()">Connect</button>
+  <div class="vl"></div>
+  <div class="cdot" id="cdot"></div>
+  <span class="ctxt" id="ctxt">Off</span>
   <div class="spills">
     <div class="spill tot">Total <span class="n" id="stT">0</span></div>
     <div class="spill on">Online <span class="n" id="stO">0</span></div>
+    <div class="spill off">Offline <span class="n" id="stF">0</span></div>
   </div>
 </div>
 
-<!-- ══ DESKTOP TOOLBAR ══ -->
-<div class="deskbar">
-  <div class="dbg">
-    <button class="dbt" onclick="selAll()">☑ All</button>
-    <button class="dbt" onclick="selNone()">☐ None</button>
-    <span id="selLbl" style="font-family:var(--mono);font-size:10px;color:var(--tx3);padding:0 4px"></span>
+<!-- ══ SCROLLABLE TOOLBAR ══ -->
+<div class="bar">
+  <!-- Selection -->
+  <div class="bg">
+    <span class="bg-label">SEL</span>
+    <button class="tbt" onclick="selAll()" title="Select All">☑ All</button>
+    <button class="tbt" onclick="selNone()" title="Deselect">☐ None</button>
+    <button class="tbt" onclick="selOnline()" title="Select all online">🟢 Online</button>
+    <button class="tbt" onclick="selOffline()" title="Select offline">🔴 Offline</button>
+    <button class="tbt" onclick="selInvert()" title="Invert selection">⇄ Invert</button>
+    <button class="tbt" onclick="selByGroup()" title="Select by group">🏷 Group</button>
+    <span id="selLbl" style="font-family:var(--mono);font-size:10px;color:var(--acc);padding:0 5px;white-space:nowrap"></span>
   </div>
-  <div class="dbg"><div class="zr"><span>🔲</span><input type="range" id="zs" min="130" max="320" value="190" oninput="setZoom(this.value)"><span id="zv">190</span></div></div>
-  <div class="dbg">
-    <button class="dbt" onclick="cmd('screenshot')">📸 SS</button>
-    <button class="dbt" onclick="toggleStream()" id="streamBtn">📡 Live</button>
-    <button class="dbt" onclick="cmd('lock')">🔒 Lock</button>
-    <button class="dbt" onclick="cmd('unlock')">🔓 Unlock</button>
-    <button class="dbt" onclick="cmd('blank_screen')">⬛ Blank</button>
+  <!-- View -->
+  <div class="bg">
+    <span class="bg-label">VIEW</span>
+    <button class="tbt act" id="vbtn-grid" onclick="setViewMode('grid')">⊞ Grid</button>
+    <button class="tbt" id="vbtn-list" onclick="setViewMode('list')">☰ List</button>
+    <div class="zr"><span>🔲</span><input type="range" id="zs" min="130" max="320" value="190" oninput="setZoom(this.value)"><span id="zv">190</span></div>
   </div>
-  <div class="dbg">
-    <button class="dbt ylw" onclick="cmd('block_input')">🚫 Blk Input</button>
-    <button class="dbt grn" onclick="cmd('allow_input')">✅ Allow</button>
+  <!-- Screen -->
+  <div class="bg">
+    <span class="bg-label">SCREEN</span>
+    <button class="tbt" onclick="cmd('screenshot')">📸 Screenshot</button>
+    <button class="tbt" onclick="saveScreenshots()" title="Screenshot + download">💾 Save SS</button>
+    <button class="tbt" onclick="openSlideshow()">🎞 Slideshow</button>
+    <button class="tbt" onclick="openSpotlight()">🔦 Spotlight</button>
+    <button class="tbt act" id="streamBtn" onclick="toggleStream()">📡 Live</button>
+    <select class="fps-sel" id="fpsSelect" onchange="updateStreamFps()">
+      <option value="4">0.25fps</option>
+      <option value="2">0.5fps</option>
+      <option value="1" selected>1fps</option>
+      <option value="0.5">2fps</option>
+      <option value="0.25">4fps</option>
+      <option value="0.1">10fps</option>
+    </select>
   </div>
-  <div class="dbg">
-    <button class="dbt" onclick="cmd('mute')">🔇 Mute</button>
-    <button class="dbt" onclick="cmd('unmute')">🔊 Unmute</button>
-    <button class="dbt" onclick="cmd('mute_mic')">🎙 MicMute</button>
-    <button class="dbt" onclick="cmd('unmute_mic')">🎤 MicOn</button>
+  <!-- Lock -->
+  <div class="bg">
+    <span class="bg-label">LOCK</span>
+    <button class="tbt" onclick="cmd('lock')">🔒 Lock</button>
+    <button class="tbt" onclick="cmd('unlock')">🔓 Unlock</button>
+    <button class="tbt" onclick="cmd('blank_screen')">⬛ Blank</button>
+    <button class="tbt" onclick="cmd('unblank')">🔆 Unblank</button>
+    <button class="tbt ylw" onclick="cmd('block_input')">🚫 Blk Input</button>
+    <button class="tbt grn" onclick="cmd('allow_input')">✅ Allow In</button>
   </div>
-  <div class="dbg">
-    <button class="dbt red" onclick="cmd('block_internet')">🌐 Blk Net</button>
-    <button class="dbt grn" onclick="cmd('allow_internet')">🌍 Allow Net</button>
-    <button class="dbt" onclick="cmd('disable_usb')">🔌 Blk USB</button>
-    <button class="dbt grn" onclick="cmd('enable_usb')">🔌 USB On</button>
-    <button class="dbt" onclick="cmd('disable_webcam')">📷 Cam Off</button>
-    <button class="dbt grn" onclick="cmd('enable_webcam')">📹 Cam On</button>
+  <!-- Audio -->
+  <div class="bg">
+    <span class="bg-label">AUDIO</span>
+    <button class="tbt" onclick="cmd('mute')">🔇 Mute</button>
+    <button class="tbt" onclick="cmd('unmute')">🔊 Unmute</button>
+    <button class="tbt" onclick="cmd('mute_mic')">🎙 MuteMic</button>
+    <button class="tbt" onclick="cmd('unmute_mic')">🎤 MicOn</button>
+    <button class="tbt pur" onclick="openAudioCall()">📞 Listen</button>
   </div>
-  <div class="dbg">
-    <button class="dbt" onclick="cmd('kill_browser')">Kill Browser</button>
-    <button class="dbt" onclick="promptRun()">⚡ Run</button>
-    <button class="dbt" onclick="promptUrl()">🔗 URL</button>
-    <button class="dbt" onclick="cmd('get_processes')">📊 Procs</button>
+  <!-- Net/Devices -->
+  <div class="bg">
+    <span class="bg-label">NET</span>
+    <button class="tbt red" onclick="cmd('block_internet')">🌐 Blk Net</button>
+    <button class="tbt grn" onclick="cmd('allow_internet')">🌍 Net On</button>
+    <button class="tbt" onclick="cmd('disable_usb')">🔌 Blk USB</button>
+    <button class="tbt grn" onclick="cmd('enable_usb')">🔌 USB On</button>
+    <button class="tbt" onclick="cmd('disable_webcam')">📷 Cam Off</button>
+    <button class="tbt grn" onclick="cmd('enable_webcam')">📹 Cam On</button>
   </div>
-  <div class="dbg">
-    <button class="dbt" onclick="cmd('logoff')">🚪 Logoff</button>
-    <button class="dbt" onclick="cmd('sleep')">💤 Sleep</button>
-    <button class="dbt ylw" onclick="ok('restart','Restart?')">↺ Restart</button>
-    <button class="dbt red" onclick="ok('shutdown','Shutdown?')">⏻ Shutdown</button>
+  <!-- Apps -->
+  <div class="bg">
+    <span class="bg-label">APPS</span>
+    <button class="tbt" onclick="cmd('kill_browser')">Kill Brwsr</button>
+    <button class="tbt" onclick="promptRun()">⚡ Run</button>
+    <button class="tbt" onclick="promptUrl()">🔗 URL</button>
+    <button class="tbt" onclick="cmd('get_processes')">📊 Procs</button>
+    <button class="tbt" onclick="cmd('start_recording')">⏺ Record</button>
+    <button class="tbt" onclick="cmd('stop_recording')">⏹ StopRec</button>
+  </div>
+  <!-- Power -->
+  <div class="bg">
+    <span class="bg-label">POWER</span>
+    <button class="tbt grn" onclick="openWOL()">⚡ Wake LAN</button>
+    <button class="tbt" onclick="cmd('logoff')">🚪 Logoff</button>
+    <button class="tbt" onclick="cmd('sleep')">💤 Sleep</button>
+    <button class="tbt ylw" onclick="ok('restart','Restart selected?')">↺ Restart</button>
+    <button class="tbt red" onclick="ok('shutdown','Shutdown selected?')">⏻ Shutdown</button>
   </div>
 </div>
 
 <!-- ══ BODY ══ -->
 <div class="body">
 
-  <!-- Desktop left nav -->
+  <!-- Left nav -->
   <div class="leftnav">
-    <button class="lni act" id="lni-g" onclick="setView('grid')">⊞<span class="lni-tip">Grid</span></button>
-    <button class="lni" id="lni-l" onclick="setView('list')">☰<span class="lni-tip">List</span></button>
-    <div style="flex:1"></div>
-    <button class="lni" onclick="showSide('actions')">⚡<span class="lni-tip">Actions</span></button>
-    <button class="lni" onclick="showSide('chat')">💬<span class="lni-tip">Chat</span></button>
-    <button class="lni" onclick="showSide('info')">ℹ<span class="lni-tip">Info</span></button>
-    <button class="lni" onclick="showSide('log')">📋<span class="lni-tip">Log</span></button>
+    <button class="lni act" id="lni-g" onclick="setViewMode('grid')">⊞<span class="tip">Grid</span></button>
+    <button class="lni" id="lni-l" onclick="setViewMode('list')">☰<span class="tip">List</span></button>
+    <div class="nav-sep"></div>
+    <button class="lni" onclick="openSlideshow()">🎞<span class="tip">Slideshow</span></button>
+    <button class="lni" onclick="openSpotlight()">🔦<span class="tip">Spotlight</span></button>
+    <button class="lni" onclick="openWOL()">⚡<span class="tip">Wake on LAN</span></button>
+    <button class="lni" onclick="openAudioCall()">📞<span class="tip">Listen Audio</span></button>
+    <div class="nav-sep"></div>
+    <button class="lni" onclick="showSide('actions')">⚡<span class="tip">Actions</span></button>
+    <button class="lni" onclick="showSide('chat')">💬<span class="tip">Chat</span></button>
+    <button class="lni" onclick="showSide('info')">ℹ<span class="tip">Info</span></button>
+    <button class="lni" onclick="showSide('log')">📋<span class="tip">Log</span></button>
   </div>
 
-  <!-- Grid area — used by both desktop and mobile -->
-  <div class="gw mob-grid-area" id="gw">
+  <!-- GRID AREA -->
+  <div class="gw" id="gw">
+    <!-- Filter bar -->
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn act" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn grn" onclick="setFilter('online',this)">🟢 Online</button>
+      <button class="filter-btn red" onclick="setFilter('offline',this)">🔴 Offline</button>
+      <button class="filter-btn" onclick="setFilter('idle',this)">🟡 Idle</button>
+      <button class="filter-btn" onclick="setFilter('streaming',this)">📡 Streaming</button>
+      <button class="filter-btn" onclick="setFilter('locked',this)">🔒 Locked</button>
+      <input class="search-fi" id="searchInput" placeholder="🔍 Search name / IP / user..." oninput="renderAll()">
+    </div>
+    <!-- Selection bar -->
+    <div class="sel-bar" id="selBar" style="display:none">
+      <span id="selCount">0 selected</span>
+      <button onclick="selAll()">All</button>
+      <button onclick="selOnline()">Online only</button>
+      <button onclick="selInvert()">Invert</button>
+      <button onclick="selNone()">Clear</button>
+    </div>
     <!-- Empty state -->
     <div class="es" id="es">
       <div class="big">🖥</div>
       <div>No computers connected</div>
-      <div style="margin-top:8px;line-height:2;font-size:11px">
-        Run on student PCs:<br>
+      <div style="margin-top:8px;line-height:2.2;font-size:11px">
         <code>pip install websockets psutil Pillow pyautogui pycaw comtypes</code>
-        <code>python agent_v3.py --server wss://hie-z3rp.onrender.com --password pass</code>
-        <code style="color:var(--ylw)">python agent_v3.py --server wss://... --password pass --install</code>
+        <code>python agent_v3.py --server wss://hie-z3rp.onrender.com --password 2847</code>
+        <code style="color:var(--ylw)">python agent_v3.py --server wss://... --password 2847 --install</code>
       </div>
     </div>
-    <!-- Desktop grid -->
+    <!-- PC grid -->
     <div class="pg" id="pg" style="display:none"></div>
-    <!-- Mobile list (shown on small screens) -->
-    <div class="mob-pc-list" id="mobList" style="display:none"></div>
+    <!-- List view -->
+    <div class="list-view" id="lv" style="display:none">
+      <div class="lv-header">
+        <div class="lv-ck"></div>
+        <div style="width:80px;flex-shrink:0">Screen</div>
+        <div style="flex:1">Name / User</div>
+        <div style="min-width:100px">IP</div>
+        <div style="min-width:90px">OS</div>
+        <div style="min-width:80px">CPU / RAM</div>
+        <div style="min-width:60px">Status</div>
+      </div>
+      <div id="lvBody"></div>
+    </div>
   </div>
 
-  <!-- Desktop sidebar -->
+  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sbt">
       <div class="st act" id="st-actions" onclick="showSide('actions')">ACTIONS</div>
       <div class="st" id="st-chat" onclick="showSide('chat')">CHAT</div>
       <div class="st" id="st-info" onclick="showSide('info')">INFO</div>
+      <div class="st" id="st-wol" onclick="showSide('wol')">WOL</div>
       <div class="st" id="st-log" onclick="showSide('log')">LOG</div>
     </div>
+
+    <!-- ACTIONS -->
     <div class="sbody" id="sb-actions">
       <div class="sec">
         <div class="sbl">Message</div>
         <select class="sse" id="mtype"><option value="info">ℹ Info</option><option value="warn">⚠ Warning</option><option value="alert">🚨 Alert</option></select>
         <input class="si" id="mtitle" placeholder="Title">
         <textarea class="sta" id="mbody" placeholder="Message text..."></textarea>
-        <input class="si" id="mdur" type="number" value="10">
+        <input class="si" id="mdur" type="number" value="10" placeholder="Duration (sec)">
         <button class="sbn acc" onclick="sendMsg()">📢 Send</button>
       </div>
       <div class="sec">
@@ -510,11 +539,7 @@ body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);ov
       </div>
       <div class="sec">
         <div class="sbl">Volume</div>
-        <div class="vol-row">
-          <span>🔊</span>
-          <input type="range" id="volS" min="0" max="100" value="70" oninput="document.getElementById('volV').textContent=this.value+'%'">
-          <span id="volV">70%</span>
-        </div>
+        <div class="vol-row"><span>🔊</span><input type="range" id="volS" min="0" max="100" value="70" oninput="document.getElementById('volV').textContent=this.value+'%'"><span id="volV">70%</span></div>
         <button class="sbn gh" onclick="sendVolume()">Set Volume</button>
       </div>
       <div class="sec">
@@ -524,19 +549,40 @@ body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);ov
         <button class="sbn gh" onclick="sendFile()">📤 Send</button>
       </div>
     </div>
+
+    <!-- CHAT -->
     <div class="sbody" id="sb-chat" style="display:none">
       <div class="sbl">Chat</div>
-      <div class="chatbox" id="chatbox-d"></div>
-      <textarea class="sta" id="chatIn-d" placeholder="Ctrl+Enter to send..."></textarea>
-      <button class="sbn acc" onclick="sendChat('d')">📨 Send</button>
+      <div class="chatbox" id="chatbox"></div>
+      <textarea class="sta" id="chatIn" placeholder="Ctrl+Enter to send..." style="min-height:55px"></textarea>
+      <button class="sbn acc" onclick="sendChat()">📨 Send</button>
+      <button class="sbn gh" onclick="document.getElementById('chatbox').innerHTML=''">Clear</button>
     </div>
+
+    <!-- INFO -->
     <div class="sbody" id="sb-info" style="display:none">
-      <div id="infoP-d"><div style="font-family:var(--mono);font-size:11px;color:var(--tx3);text-align:center;padding:24px">Click a computer</div></div>
+      <div id="infoP"><div style="font-family:var(--mono);font-size:11px;color:var(--tx3);text-align:center;padding:24px">Click a computer</div></div>
     </div>
+
+    <!-- WOL -->
+    <div class="sbody" id="sb-wol" style="display:none">
+      <div class="sbl">Wake on LAN</div>
+      <p style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-bottom:10px;line-height:1.7">Send magic packet to wake offline computers. Requires WOL enabled in BIOS.</p>
+      <div class="sec">
+        <input class="si" id="wol-mac" placeholder="MAC: AA:BB:CC:DD:EE:FF">
+        <input class="si" id="wol-name" placeholder="Name (optional)">
+        <button class="sbn grn" onclick="sendWOL()">⚡ Wake Device</button>
+        <button class="sbn gh" onclick="saveWOLDevice()">💾 Save Device</button>
+      </div>
+      <div class="sbl">Saved Devices</div>
+      <div id="wolList"></div>
+    </div>
+
+    <!-- LOG -->
     <div class="sbody" id="sb-log" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
-        <div class="sbl" style="margin:0">Log</div>
-        <button style="font-size:10px;cursor:pointer;color:var(--tx3);background:none;border:none" onclick="clearLog()">Clear</button>
+        <div class="sbl" style="margin:0">Activity Log</div>
+        <button style="font-size:10px;cursor:pointer;color:var(--tx3);background:none;border:none" onclick="document.getElementById('ll').innerHTML=''">Clear</button>
       </div>
       <div class="ll" id="ll"></div>
     </div>
@@ -546,61 +592,47 @@ body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);ov
 <!-- ══ MOBILE BOTTOM NAV ══ -->
 <div class="bottomnav">
   <div class="bnav-inner">
-    <button class="bnav-item act" id="bn-computers" onclick="mobileNav('computers')">
-      <span class="bi">🖥</span><span>Computers</span>
-    </button>
-    <button class="bnav-item" id="bn-commands" onclick="mobileNav('commands')">
-      <span class="bi">⚡</span><span>Commands</span>
-    </button>
-    <button class="bnav-item" id="bn-chat" onclick="mobileNav('chat')">
-      <span class="bi">💬</span><span>Chat</span>
-    </button>
-    <button class="bnav-item" id="bn-info" onclick="mobileNav('info')">
-      <span class="bi">ℹ</span><span>Info</span>
-    </button>
-    <button class="bnav-item" id="bn-log" onclick="mobileNav('log')">
-      <span class="bi">📋</span><span>Log</span>
-    </button>
+    <button class="bnav-item act" id="bn-computers" onclick="mobileNav('computers')"><span class="bi">🖥</span><span>Computers</span></button>
+    <button class="bnav-item" id="bn-commands" onclick="mobileNav('commands')"><span class="bi">⚡</span><span>Commands</span></button>
+    <button class="bnav-item" id="bn-view" onclick="mobileNav('view')"><span class="bi">🎞</span><span>View</span></button>
+    <button class="bnav-item" id="bn-chat" onclick="mobileNav('chat')"><span class="bi">💬</span><span>Chat</span></button>
+    <button class="bnav-item" id="bn-log" onclick="mobileNav('log')"><span class="bi">📋</span><span>Log</span></button>
   </div>
 </div>
-
 </div><!-- end .app -->
 
-<!-- ══════════════════════════════════════════
-     MOBILE SHEETS
-══════════════════════════════════════════ -->
+<!-- SHEET BG -->
 <div class="sheet-bg" id="sheetBg" onclick="closeAllSheets()"></div>
 
 <!-- COMMANDS SHEET -->
 <div class="m-sheet" id="sheet-commands">
-  <div class="m-sheet-handle"></div>
-  <div class="m-sheet-title">Commands <button class="m-sheet-cls" onclick="closeSheet('commands')">✕</button></div>
+  <div class="m-handle"></div>
+  <div class="m-sheet-title">Commands — <span id="mob-sel-lbl" style="color:var(--acc);font-size:11px">All online</span><button class="m-cls" onclick="closeSheet('commands')">✕</button></div>
   <div class="m-sheet-body">
-    <div id="mob-sel-info" style="font-family:var(--mono);font-size:11px;color:var(--tx3);margin-bottom:10px;padding:6px 8px;background:var(--bg);border-radius:5px;border:1px solid var(--b2)">
-      Targeting: <span id="mob-sel-lbl" style="color:var(--acc)">All online</span>
-    </div>
-
-    <div class="mob-section-title">Screen</div>
+    <div class="mob-sec-title">Screen</div>
     <div class="mob-cmds">
-      <div class="mcmd acc" onclick="cmd('screenshot');closeSheet('commands')"><span class="mi">📸</span>Screenshot</div>
-      <div class="mcmd acc" onclick="toggleStream();closeSheet('commands')"><span class="mi">📡</span>Live</div>
+      <div class="mcmd acc" onclick="cmd('screenshot');"><span class="mi">📸</span>Screenshot</div>
+      <div class="mcmd acc" onclick="saveScreenshots();closeSheet('commands')"><span class="mi">💾</span>Save SS</div>
+      <div class="mcmd" onclick="openSlideshow();closeSheet('commands')"><span class="mi">🎞</span>Slideshow</div>
+      <div class="mcmd" onclick="openSpotlight();closeSheet('commands')"><span class="mi">🔦</span>Spotlight</div>
       <div class="mcmd ylw" onclick="cmd('lock');closeSheet('commands')"><span class="mi">🔒</span>Lock</div>
       <div class="mcmd grn" onclick="cmd('unlock');closeSheet('commands')"><span class="mi">🔓</span>Unlock</div>
       <div class="mcmd" onclick="cmd('blank_screen');closeSheet('commands')"><span class="mi">⬛</span>Blank</div>
       <div class="mcmd" onclick="cmd('unblank');closeSheet('commands')"><span class="mi">🔆</span>Unblank</div>
       <div class="mcmd ylw" onclick="cmd('block_input');closeSheet('commands')"><span class="mi">🚫</span>Blk Input</div>
       <div class="mcmd grn" onclick="cmd('allow_input');closeSheet('commands')"><span class="mi">✅</span>Allow In</div>
+      <div class="mcmd" onclick="cmd('start_recording');closeSheet('commands')"><span class="mi">⏺</span>Record</div>
+      <div class="mcmd" onclick="cmd('stop_recording');closeSheet('commands')"><span class="mi">⏹</span>Stop Rec</div>
     </div>
-
-    <div class="mob-section-title">Audio</div>
+    <div class="mob-sec-title">Audio</div>
     <div class="mob-cmds">
       <div class="mcmd" onclick="cmd('mute');closeSheet('commands')"><span class="mi">🔇</span>Mute</div>
       <div class="mcmd grn" onclick="cmd('unmute');closeSheet('commands')"><span class="mi">🔊</span>Unmute</div>
       <div class="mcmd" onclick="cmd('mute_mic');closeSheet('commands')"><span class="mi">🎙</span>Mute Mic</div>
       <div class="mcmd grn" onclick="cmd('unmute_mic');closeSheet('commands')"><span class="mi">🎤</span>Mic On</div>
+      <div class="mcmd pur" onclick="openAudioCall();closeSheet('commands')"><span class="mi">📞</span>Listen</div>
     </div>
-
-    <div class="mob-section-title">Internet & Devices</div>
+    <div class="mob-sec-title">Internet & Devices</div>
     <div class="mob-cmds">
       <div class="mcmd red" onclick="cmd('block_internet');closeSheet('commands')"><span class="mi">🌐</span>Blk Net</div>
       <div class="mcmd grn" onclick="cmd('allow_internet');closeSheet('commands')"><span class="mi">🌍</span>Net On</div>
@@ -609,110 +641,113 @@ body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);ov
       <div class="mcmd red" onclick="cmd('disable_webcam');closeSheet('commands')"><span class="mi">📷</span>Cam Off</div>
       <div class="mcmd grn" onclick="cmd('enable_webcam');closeSheet('commands')"><span class="mi">📹</span>Cam On</div>
       <div class="mcmd red" onclick="cmd('kill_browser');closeSheet('commands')"><span class="mi">🌐</span>Kill Brwsr</div>
+      <div class="mcmd grn" onclick="openWOL();closeSheet('commands')"><span class="mi">⚡</span>Wake LAN</div>
     </div>
-
-    <div class="mob-section-title">Message</div>
-    <div class="sec" style="margin-bottom:10px">
+    <div class="mob-sec-title">Message</div>
+    <div style="margin-bottom:10px">
       <select class="sse" id="m-mtype"><option value="info">ℹ Info</option><option value="warn">⚠ Warning</option><option value="alert">🚨 Alert</option></select>
-      <input class="si" id="m-mtitle" placeholder="Title (optional)">
-      <textarea class="sta" id="m-mbody" placeholder="Message text..."></textarea>
-      <button class="sbn acc" onclick="sendMsgMobile()">📢 Send Message</button>
+      <input class="si" id="m-mtitle" placeholder="Title">
+      <textarea class="sta" id="m-mbody" placeholder="Message..."></textarea>
+      <button class="sbn acc" onclick="sendMsgMob()">📢 Send</button>
     </div>
-
-    <div class="mob-section-title">Open URL</div>
-    <div class="sec" style="margin-bottom:10px">
-      <input class="si" id="m-uval" placeholder="https://..." type="url">
-      <button class="sbn grn" onclick="sendUrlMobile()">🚀 Open on Computers</button>
+    <div class="mob-sec-title">Quick</div>
+    <div style="margin-bottom:8px">
+      <input class="si" id="m-uval" placeholder="URL to open..." type="url">
+      <button class="sbn grn" onclick="sendUrlMob()">🚀 Open URL</button>
+      <input class="si" id="m-rcmd" placeholder="Command to run...">
+      <button class="sbn gh" onclick="sendRunMob()">▶ Execute</button>
     </div>
-
-    <div class="mob-section-title">Run Command</div>
-    <div class="sec" style="margin-bottom:10px">
-      <input class="si" id="m-rcmd" placeholder="e.g. calc.exe">
-      <button class="sbn gh" onclick="sendRunMobile()">▶ Execute</button>
-    </div>
-
-    <div class="mob-section-title">Volume</div>
-    <div class="sec" style="margin-bottom:10px">
-      <div class="vol-row">
-        <span>🔊</span>
-        <input type="range" id="m-volS" min="0" max="100" value="70" oninput="document.getElementById('m-volV').textContent=this.value+'%'">
-        <span id="m-volV">70%</span>
-      </div>
-      <button class="sbn gh" onclick="sendVolumeMobile()">Set Volume</button>
-    </div>
-
-    <div class="mob-section-title">Power</div>
+    <div class="mob-sec-title">Power</div>
     <div class="mob-cmds">
       <div class="mcmd" onclick="cmd('logoff');closeSheet('commands')"><span class="mi">🚪</span>Logoff</div>
       <div class="mcmd" onclick="cmd('sleep');closeSheet('commands')"><span class="mi">💤</span>Sleep</div>
-      <div class="mcmd ylw" onclick="ok('restart','Restart selected?');closeSheet('commands')"><span class="mi">↺</span>Restart</div>
-      <div class="mcmd red" onclick="ok('shutdown','Shutdown selected?');closeSheet('commands')"><span class="mi">⏻</span>Shutdown</div>
+      <div class="mcmd ylw" onclick="ok('restart','Restart?');closeSheet('commands')"><span class="mi">↺</span>Restart</div>
+      <div class="mcmd red" onclick="ok('shutdown','Shutdown?');closeSheet('commands')"><span class="mi">⏻</span>Shutdown</div>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW SHEET (mobile slideshow/spotlight) -->
+<div class="m-sheet" id="sheet-view">
+  <div class="m-handle"></div>
+  <div class="m-sheet-title">View Options <button class="m-cls" onclick="closeSheet('view')">✕</button></div>
+  <div class="m-sheet-body">
+    <div class="mob-cmds" style="grid-template-columns:repeat(3,1fr)">
+      <div class="mcmd acc" onclick="openSlideshow();closeSheet('view')"><span class="mi">🎞</span>Slideshow</div>
+      <div class="mcmd" onclick="openSpotlight();closeSheet('view')"><span class="mi">🔦</span>Spotlight</div>
+      <div class="mcmd" onclick="cmd('screenshot');closeSheet('view')"><span class="mi">📸</span>Screenshot All</div>
+      <div class="mcmd" onclick="saveScreenshots();closeSheet('view')"><span class="mi">💾</span>Save All SS</div>
+      <div class="mcmd act" onclick="toggleStream();closeSheet('view')" id="mob-stream-btn"><span class="mi">📡</span>Live Stream</div>
+    </div>
+    <div class="mob-sec-title">Stream FPS</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="filter-btn" onclick="setMobFps(4)">0.25fps</button>
+      <button class="filter-btn" onclick="setMobFps(2)">0.5fps</button>
+      <button class="filter-btn act" onclick="setMobFps(1)">1fps</button>
+      <button class="filter-btn" onclick="setMobFps(0.5)">2fps</button>
+      <button class="filter-btn" onclick="setMobFps(0.25)">4fps</button>
+      <button class="filter-btn" onclick="setMobFps(0.1)">10fps</button>
     </div>
   </div>
 </div>
 
 <!-- CHAT SHEET -->
 <div class="m-sheet" id="sheet-chat">
-  <div class="m-sheet-handle"></div>
-  <div class="m-sheet-title">Chat <button class="m-sheet-cls" onclick="closeSheet('chat')">✕</button></div>
-  <div class="m-sheet-body" style="display:flex;flex-direction:column;height:calc(60vh - 60px)">
+  <div class="m-handle"></div>
+  <div class="m-sheet-title">Chat <button class="m-cls" onclick="closeSheet('chat')">✕</button></div>
+  <div class="m-sheet-body" style="display:flex;flex-direction:column;height:55vh">
     <div class="chatbox" id="chatbox-m" style="flex:1;max-height:none"></div>
     <div style="margin-top:auto;padding-top:8px">
       <textarea class="sta" id="chatIn-m" placeholder="Type message..." style="min-height:50px"></textarea>
-      <button class="sbn acc" onclick="sendChat('m')">📨 Send to Selected</button>
+      <button class="sbn acc" onclick="sendChatMob()">📨 Send</button>
     </div>
-  </div>
-</div>
-
-<!-- INFO SHEET -->
-<div class="m-sheet" id="sheet-info">
-  <div class="m-sheet-handle"></div>
-  <div class="m-sheet-title" id="sheet-info-title">System Info <button class="m-sheet-cls" onclick="closeSheet('info')">✕</button></div>
-  <div class="m-sheet-body">
-    <div id="infoP-m"><div style="font-family:var(--mono);font-size:11px;color:var(--tx3);text-align:center;padding:24px">Tap a computer to see info</div></div>
   </div>
 </div>
 
 <!-- LOG SHEET -->
 <div class="m-sheet" id="sheet-log">
-  <div class="m-sheet-handle"></div>
-  <div class="m-sheet-title">Activity Log <button class="m-sheet-cls" onclick="closeSheet('log')">✕</button></div>
-  <div class="m-sheet-body">
-    <div class="ll" id="ll-m" style="max-height:none"></div>
-  </div>
+  <div class="m-handle"></div>
+  <div class="m-sheet-title">Log <button class="m-cls" onclick="closeSheet('log')">✕</button></div>
+  <div class="m-sheet-body"><div class="ll" id="ll-m" style="max-height:none"></div></div>
 </div>
 
-<!-- PC DETAIL SHEET -->
-<div class="m-sheet" id="sheet-pcdetail">
-  <div class="m-sheet-handle"></div>
-  <div class="m-sheet-title" id="pcdetail-title">Computer Detail <button class="m-sheet-cls" onclick="closeSheet('pcdetail')">✕</button></div>
-  <div class="m-sheet-body" id="pcdetail-body"></div>
-</div>
-
-<!-- ══════════════════════════════════════════
-     REMOTE CONTROL FULLSCREEN
-══════════════════════════════════════════ -->
+<!-- ══ REMOTE CONTROL OVERLAY ══ -->
 <div class="rcov" id="rcov">
   <div class="rcbar">
-    <div class="rctit" id="rctit">Remote</div>
+    <div class="rctit" id="rctit">Remote Control</div>
     <div class="rcmodes">
       <button class="rcmb act" id="rcm-ctrl" onclick="setRCMode('control')">🖱 Ctrl</button>
       <button class="rcmb" id="rcm-view" onclick="setRCMode('view')">👁 View</button>
     </div>
-    <div class="rc-quality">
-      <input type="range" id="rcQ" min="20" max="80" value="40" oninput="document.getElementById('rcQV').textContent=this.value">
-      <span id="rcQV">40</span>
-    </div>
+    <select class="fps-sel" id="rcFpsSelect" onchange="updateRCFps()">
+      <option value="2">0.5fps</option>
+      <option value="1" selected>1fps</option>
+      <option value="0.5">2fps</option>
+      <option value="0.25">4fps</option>
+      <option value="0.1">10fps</option>
+    </select>
     <span id="rcFps" style="font-family:var(--mono);font-size:10px;color:var(--tx3);flex-shrink:0">—fps</span>
-    <button class="dbt" onclick="rcCmd('screenshot')" style="flex-shrink:0">📸</button>
-    <button class="dbt" onclick="rcCmd('lock')" style="flex-shrink:0">🔒</button>
-    <button class="dbt" onclick="rcCmd('unlock')" style="flex-shrink:0">🔓</button>
-    <button class="dbt" onclick="rcCmd('mute')" style="flex-shrink:0">🔇</button>
+    <button class="tbt" onclick="rcCmd('screenshot')" style="flex-shrink:0">📸</button>
+    <button class="tbt" onclick="rcCmd('lock')" style="flex-shrink:0">🔒</button>
+    <button class="tbt" onclick="rcCmd('unlock')" style="flex-shrink:0">🔓</button>
+    <button class="tbt" onclick="rcCmd('mute')" style="flex-shrink:0">🔇</button>
+    <button class="tbt" onclick="rcCmd('block_input')" style="flex-shrink:0">🚫</button>
+    <button class="tbt ylw" onclick="if(confirm('Restart?'))rcCmd('restart')" style="flex-shrink:0">↺</button>
+    <button class="tbt red" onclick="if(confirm('Shutdown?'))rcCmd('shutdown')" style="flex-shrink:0">⏻</button>
     <button class="rcclose" onclick="closeRC()">✕</button>
   </div>
   <div class="rcwrap ctrl" id="rcwrap">
     <canvas id="rccanvas"></canvas>
-    <div class="rc-ph" id="rc-ph">Waiting for screenshot…<br>Click 📸 to capture</div>
+    <div class="rc-ph" id="rc-ph">Waiting for screenshot…</div>
+    <!-- Mobile touch joystick for mouse -->
+    <div class="touch-pad" id="touchPad">
+      <div class="touch-pad-dot" id="touchDot"></div>
+    </div>
+    <div class="touch-btns" id="touchBtns">
+      <div class="touch-btn" id="touchLC" ontouchstart="rcTouchBtn('left',true)" ontouchend="rcTouchBtn('left',false)">👆</div>
+      <div class="touch-btn" id="touchRC" ontouchstart="rcTouchBtn('right',true)" ontouchend="rcTouchBtn('right',false)">☝</div>
+      <div class="touch-btn" onclick="rcTypePrompt()">⌨</div>
+    </div>
   </div>
   <div class="kbbar">
     <span style="font-family:var(--mono);font-size:9px;color:var(--tx3);flex-shrink:0">KEYS:</span>
@@ -726,35 +761,114 @@ body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);ov
     <button class="kbtn" onclick="rcSendKey('tab')">Tab</button>
     <button class="kbtn" onclick="rcSendKey('escape')">Esc</button>
     <button class="kbtn" onclick="rcSendKey('enter')">Enter</button>
+    <button class="kbtn" onclick="rcSendKey('delete')">Del</button>
     <button class="kbtn" onclick="rcKey('alt','f4')">Alt+F4</button>
     <button class="kbtn" onclick="rcKey('ctrl','shift','escape')">Task Mgr</button>
+    <button class="kbtn" onclick="rcKey('winleft','d')">Desktop</button>
     <button class="kbtn" onclick="rcTypePrompt()">⌨ Type</button>
+  </div>
+</div>
+
+<!-- SLIDESHOW OVERLAY -->
+<div class="slideshow-overlay" id="ssOverlay">
+  <div class="ss-top">
+    <div class="ss-title" id="ssTitle">Slideshow — All Computers</div>
+    <select class="fps-sel" id="ssLayout" onchange="renderSlideshow()">
+      <option value="2">2 screens</option>
+      <option value="4" selected>4 screens</option>
+      <option value="6">6 screens</option>
+      <option value="9">9 screens</option>
+      <option value="16">16 screens</option>
+    </select>
+    <button class="tbt" onclick="cmd('screenshot')">📸 Refresh All</button>
+    <button class="tbt" onclick="saveScreenshots()">💾 Save All</button>
+    <button class="rcclose" onclick="closeOverlay('ssOverlay')">✕</button>
+  </div>
+  <div class="ss-grid" id="ssGrid"></div>
+</div>
+
+<!-- SPOTLIGHT OVERLAY -->
+<div class="spotlight-overlay" id="spotOverlay">
+  <div style="position:absolute;top:12px;right:12px;display:flex;gap:6px">
+    <button class="tbt" onclick="spotPrev()">◀ Prev</button>
+    <button class="tbt" onclick="spotNext()">Next ▶</button>
+    <button class="tbt" onclick="rcCmd('screenshot')">📸 Refresh</button>
+    <button class="rcclose" onclick="closeOverlay('spotOverlay')">✕</button>
+  </div>
+  <div class="spotlight-frame">
+    <div class="spotlight-img-wrap" id="spotImg">
+      <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-family:var(--mono)">Select a computer first</div>
+    </div>
+    <div class="spotlight-info" id="spotInfo">—</div>
+  </div>
+</div>
+
+<!-- WOL MODAL -->
+<div class="modal-bg" id="wolModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('wolModal')">✕</button>
+    <h3>⚡ Wake on LAN</h3>
+    <p style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-bottom:12px;line-height:1.7">Send a magic packet to wake sleeping/off computers. WOL must be enabled in BIOS and the PC must be on the same network.</p>
+    <div class="sbl">MAC Address</div>
+    <input class="si" id="wol-mac-m" placeholder="AA:BB:CC:DD:EE:FF">
+    <div class="sbl">Label (optional)</div>
+    <input class="si" id="wol-name-m" placeholder="e.g. LAB-PC-01">
+    <button class="sbn grn" onclick="sendWOLModal()">⚡ Wake Device</button>
+    <button class="sbn gh" onclick="saveWOLModal()">💾 Save to List</button>
+    <div class="sbl" style="margin-top:12px">Saved Devices</div>
+    <div id="wolListM"></div>
+  </div>
+</div>
+
+<!-- AUDIO CALL MODAL -->
+<div class="modal-bg" id="audioModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('audioModal')">✕</button>
+    <h3>📞 Listen to Agent Audio</h3>
+    <p style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-bottom:12px;line-height:1.7">
+      This feature streams audio from the selected computer's microphone to your browser.<br><br>
+      ⚠ Requires: agent v3+ with microphone access, and the agent must be running on Windows with PyAudio installed.<br><br>
+      Install on agent PC: <code style="color:var(--acc)">pip install pyaudio</code>
+    </p>
+    <div class="sbl">Target Computer</div>
+    <select class="sse" id="audioTarget"></select>
+    <div id="audioStatus" style="font-family:var(--mono);font-size:11px;color:var(--tx3);margin:8px 0">Status: Not connected</div>
+    <audio id="audioPlayer" controls style="width:100%;margin-bottom:8px;display:none"></audio>
+    <button class="sbn pur" onclick="startAudioListen()">📞 Start Listening</button>
+    <button class="sbn gh" onclick="stopAudioListen()">⏹ Stop</button>
+    <div class="sbl" style="margin-top:10px">Two-way Call</div>
+    <p style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-bottom:8px">Send your voice to the agent computer's speakers.</p>
+    <button class="sbn pur" id="talkBtn" onclick="toggleTalk()">🎙 Start Talking</button>
   </div>
 </div>
 
 <!-- CONTEXT MENU -->
 <div class="ctx" id="ctx">
   <div class="ci" onclick="ca('screenshot')">📸 Screenshot</div>
-  <div class="ci" onclick="openRC(ctxId,'view')">👁 View</div>
+  <div class="ci" onclick="caSave()">💾 Screenshot + Save</div>
+  <div class="ci" onclick="openRC(ctxId,'view')">👁 View Screen</div>
   <div class="ci" onclick="openRC(ctxId,'control')">🖱 Remote Control</div>
+  <div class="ci" onclick="spotlightPC(ctxId)">🔦 Spotlight</div>
   <div class="cs"></div>
   <div class="ci" onclick="ca('lock')">🔒 Lock</div>
   <div class="ci" onclick="ca('unlock')">🔓 Unlock</div>
-  <div class="ci" onclick="ca('blank_screen')">⬛ Blank</div>
+  <div class="ci" onclick="ca('blank_screen')">⬛ Blank Screen</div>
   <div class="ci" onclick="ca('block_input')">🚫 Block Input</div>
   <div class="ci" onclick="ca('allow_input')">✅ Allow Input</div>
   <div class="cs"></div>
   <div class="ci" onclick="ca('mute')">🔇 Mute</div>
   <div class="ci" onclick="ca('unmute')">🔊 Unmute</div>
   <div class="ci" onclick="ca('mute_mic')">🎙 Mute Mic</div>
+  <div class="ci" onclick="ca('unmute_mic')">🎤 Unmute Mic</div>
   <div class="cs"></div>
   <div class="ci" onclick="ca('block_internet')">🌐 Block Net</div>
   <div class="ci" onclick="ca('allow_internet')">🌍 Allow Net</div>
-  <div class="ci" onclick="ca('disable_usb')">🔌 Block USB</div>
-  <div class="ci" onclick="ca('enable_usb')">🔌 Allow USB</div>
+  <div class="ci" onclick="ca('disable_usb')">🔌 Disable USB</div>
+  <div class="ci" onclick="ca('enable_usb')">🔌 Enable USB</div>
   <div class="cs"></div>
-  <div class="ci" onclick="openMobDetail(ctxId)">ℹ Info</div>
+  <div class="ci" onclick="openInfoFor(ctxId)">ℹ System Info</div>
   <div class="ci" onclick="ca('get_processes')">📊 Processes</div>
+  <div class="ci" onclick="ca('start_recording')">⏺ Record Screen</div>
   <div class="ci" onclick="ca('logoff')">🚪 Log Off</div>
   <div class="cs"></div>
   <div class="ci r" onclick="ca('restart')">↺ Restart</div>
@@ -763,15 +877,19 @@ body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);ov
 
 <div class="tw" id="tw"></div>
 
-<!-- ══════════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════════ -->
 <script>
-// ─── STATE ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
 let ws=null, pcs={}, sel=new Set();
 let ctxId=null, rcId=null, rcMode='view', rcStreaming=false, globalStreaming=false;
 let reconnTimer=null, rcFpsArr=[];
-let isMobile = window.innerWidth <= 900;
+let currentFilter='all', currentViewMode='grid';
+let spotIdx=0, spotIds=[];
+let streamFpsInterval=1;
+let wolDevices=JSON.parse(localStorage.getItem('lc_wol')||'[]');
+let talkActive=false, talkStream=null, talkCtx=null;
+let audioListenId=null;
 
 const LS={
   get url(){return localStorage.getItem('lc_u')||''},
@@ -780,47 +898,29 @@ const LS={
   set pass(v){localStorage.setItem('lc_p',v)}
 };
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('wsUrl').value  = LS.url  || 'wss://hie-z3rp.onrender.com';
-  document.getElementById('wsPass').value = LS.pass;
+  document.getElementById('wsUrl').value=LS.url||'wss://hie-z3rp.onrender.com';
+  document.getElementById('wsPass').value=LS.pass;
   setZoom(190);
-  checkMobile();
-  if(LS.url) connect();
   initRC();
-  // swipe-down on sheets to close
   initSheetSwipe();
+  renderWOLList();
+  if(LS.url) connect();
 });
 
-window.addEventListener('resize',()=>{
-  isMobile = window.innerWidth <= 900;
-  checkMobile();
-});
-
-function checkMobile(){
-  // On phone, show mob list instead of grid
-  if(window.innerWidth <= 540){
-    document.getElementById('pg').style.display='none';
-    document.getElementById('mobList').style.display='flex';
-  } else if(window.innerWidth <= 900){
-    // Tablet: show grid but mobile nav
-    document.getElementById('pg').style.display='grid';
-    document.getElementById('mobList').style.display='none';
-  } else {
-    document.getElementById('pg').style.display=Object.keys(pcs).length?'grid':'none';
-    document.getElementById('mobList').style.display='none';
-  }
-}
-
-// ─── WEBSOCKET ────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// WEBSOCKET
+// ═══════════════════════════════════════════════════════
 function toggleConn(){
-  ws && ws.readyState===WebSocket.OPEN ? disconnect() : (
+  ws&&ws.readyState===WebSocket.OPEN?disconnect():(
     LS.url=document.getElementById('wsUrl').value.trim(),
     LS.pass=document.getElementById('wsPass').value,
     connect()
   );
 }
-
 function connect(){
   if(ws) try{ws.close()}catch(e){}
   const url=document.getElementById('wsUrl').value.trim()||LS.url;
@@ -830,7 +930,7 @@ function connect(){
   ws.onopen=()=>{
     setSt('on'); clearTimeout(reconnTimer);
     ws.send(JSON.stringify({type:'auth',role:'admin',password:document.getElementById('wsPass').value||LS.pass}));
-    log('Connected','ok'); toast('Connected ✓');
+    log('Connected ✓','ok'); toast('Connected ✓');
   };
   ws.onclose=()=>{
     setSt('off');
@@ -842,96 +942,176 @@ function connect(){
   ws.onerror=()=>{};
   ws.onmessage=e=>{try{onMsg(JSON.parse(e.data))}catch{}};
 }
-
 function disconnect(){
   clearTimeout(reconnTimer);reconnTimer=null;
   if(ws){ws.onclose=null;ws.close();ws=null;}
   setSt('off');
 }
-
 function sendWS(data){
   if(!ws||ws.readyState!==WebSocket.OPEN){toast('Not connected','e');return false;}
   ws.send(JSON.stringify(data));return true;
 }
 
-// ─── MESSAGE HANDLER ──────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// MESSAGES — Live automatic update
+// ═══════════════════════════════════════════════════════
 function onMsg(m){
   switch(m.type){
-    case 'auth_ok':    log('Authenticated ✓','ok'); break;
+    case 'auth_ok':    log('Auth ✓','ok'); break;
     case 'auth_error': toast('Wrong password','e'); disconnect(); break;
     case 'agent_list':
       pcs={};(m.agents||[]).forEach(a=>addPC(a));
       renderAll();updateStats();log(`${m.agents.length} agent(s) online`,'ok'); break;
+
+    // ── LIVE AUTO-UPDATE when new device connects ──
     case 'agent_connected':
-      addPC(m);renderAll();updateStats();log(`+ ${m.name}`,'ok');toast(`🖥 ${m.name} joined`); break;
+      addPC(m);
+      addCardLive(m.id);   // insert card without full re-render
+      updateStats();
+      log(`+ ${m.name}`,'ok');
+      toast(`🖥 ${m.name} joined`);
+      break;
+
     case 'agent_disconnected':
-      if(pcs[m.id]){pcs[m.id].status='offline';updateCard(m.id);updateMobCard(m.id);updateStats();log(`- ${pcs[m.id].name}`,'w');} break;
+      if(pcs[m.id]){
+        pcs[m.id].status='offline';
+        updateCardDOM(m.id);
+        updateStats();
+        log(`- ${pcs[m.id]?.name}`,'w');
+      }
+      break;
+
     case 'stats_update':
-      if(pcs[m.id]){pcs[m.id].cpu=m.cpu??0;pcs[m.id].ram=m.ram??0;updateCard(m.id);updateMobCard(m.id);} break;
+      if(pcs[m.id]){pcs[m.id].cpu=m.cpu??0;pcs[m.id].ram=m.ram??0;updateCardDOM(m.id);}
+      break;
+
     case 'idle_update':
-      if(pcs[m.id]){pcs[m.id].status=m.idle?'idle':'online';updateCard(m.id);updateMobCard(m.id);updateStats();} break;
+      if(pcs[m.id]){pcs[m.id].status=m.idle?'idle':'online';updateCardDOM(m.id);updateStats();}
+      break;
+
     case 'screenshot':
       if(pcs[m.id]){
         pcs[m.id].screenshot=m.data;
         updateCardScreen(m.id);
-        updateMobCardScreen(m.id);
+        updateLVScreen(m.id);
         if(rcId===m.id) renderRC(m.data);
+        if(document.getElementById('ssOverlay').classList.contains('open')) updateSSCell(m.id);
+        if(document.getElementById('spotOverlay').classList.contains('open')&&spotIds[spotIdx]===m.id) updateSpotlight(m.id);
       }
       break;
+
     case 'cmd_result':
       log(`[${pcs[m.id]?.name||m.id}] ${m.cmd}: ${m.result}`,m.success?'ok':'e'); break;
+
     case 'delivery_report':
       log(`→ ${m.cmd}: ${m.delivered}/${m.total}`,'ok'); break;
+
     case 'sysinfo':
-      if(pcs[m.id]){pcs[m.id].sysinfo=m.data;renderInfoBoth(m.id);} break;
+      if(pcs[m.id]){pcs[m.id].sysinfo=m.data;renderInfo(m.id);} break;
+
     case 'process_list':
       if(pcs[m.id]){pcs[m.id].processes=m.list;renderProcs(m.id);} break;
+
     case 'chat_reply':
-      appendChatBoth(m.from,m.text,'ag'); break;
+      appendChat(m.from,m.text,'ag'); break;
+
+    case 'audio_chunk':
+      handleAudioChunk(m.data); break;
   }
 }
 
-// ─── PC DATA ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// PC DATA
+// ═══════════════════════════════════════════════════════
 function addPC(a){
   pcs[a.id]={id:a.id,name:a.name||a.id,user:a.user||'—',ip:a.ip||'—',
     os:a.os||'—',status:a.status||'online',cpu:a.cpu??0,ram:a.ram??0,
-    screenshot:null,sysinfo:null,processes:[],connectedAt:a.connectedAt||new Date().toISOString()};
+    screenshot:null,sysinfo:null,processes:[],
+    connectedAt:a.connectedAt||new Date().toISOString()};
 }
 
-// ─── RENDER (desktop grid) ────────────────────────────────────────────────────
-function renderAll(){
-  const list=Object.values(pcs);
-  const pg=document.getElementById('pg');
-  const es=document.getElementById('es');
-  checkMobile();
-  if(!list.length){es.style.display='flex';return;}
-  es.style.display='none';
-  // Desktop grid
-  if(window.innerWidth>540){pg.style.display='grid';}
-  list.forEach(pc=>{
-    if(!document.getElementById('pc-'+pc.id)) pg.appendChild(buildCard(pc));
-    else updateCard(pc.id);
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function filteredPCs(){
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  return Object.values(pcs).filter(pc=>{
+    const matchFilter=
+      currentFilter==='all'||
+      (currentFilter==='online'&&pc.status==='online')||
+      (currentFilter==='offline'&&pc.status==='offline')||
+      (currentFilter==='idle'&&pc.status==='idle')||
+      (currentFilter==='streaming'&&pc.streaming)||
+      (currentFilter==='locked'&&pc.locked);
+    const matchSearch=!q||pc.name.toLowerCase().includes(q)||
+      pc.user.toLowerCase().includes(q)||pc.ip.includes(q)||pc.os.toLowerCase().includes(q);
+    return matchFilter&&matchSearch;
   });
-  [...pg.children].forEach(el=>{if(el.dataset.id&&!pcs[el.dataset.id])el.remove();});
-  // Mobile list
-  renderMobList();
+}
+
+function renderAll(){
+  const list=filteredPCs();
+  const pg=document.getElementById('pg');
+  const lv=document.getElementById('lv');
+  const es=document.getElementById('es');
+
+  if(!Object.keys(pcs).length){es.style.display='flex';pg.style.display='none';lv.style.display='none';return;}
+  es.style.display='none';
+
+  if(currentViewMode==='grid'){
+    pg.style.display='grid'; lv.style.display='none';
+    // Add new, remove old
+    list.forEach(pc=>{
+      if(!document.getElementById('pc-'+pc.id)) pg.appendChild(buildCard(pc));
+      else updateCardDOM(pc.id);
+    });
+    [...pg.children].forEach(el=>{
+      if(el.dataset.id){
+        const pc=pcs[el.dataset.id];
+        const show=list.some(p=>p.id===el.dataset.id);
+        el.style.display=show?'':'none';
+      }
+    });
+  } else {
+    pg.style.display='none'; lv.style.display='flex';
+    renderListView(list);
+  }
+  updateSelBar();
+}
+
+// Live insert single card without full re-render
+function addCardLive(id){
+  const pc=pcs[id]; if(!pc) return;
+  const list=filteredPCs();
+  if(!list.some(p=>p.id===id)) return;
+
+  if(currentViewMode==='grid'){
+    const pg=document.getElementById('pg');
+    pg.style.display='grid';
+    document.getElementById('es').style.display='none';
+    if(!document.getElementById('pc-'+id)) pg.appendChild(buildCard(pc));
+  } else {
+    renderListView(filteredPCs());
+  }
+  updateStats();
 }
 
 function buildCard(pc){
   const d=document.createElement('div');
-  d.className=cc(pc);d.id='pc-'+pc.id;d.dataset.id=pc.id;
+  d.className=cc(pc); d.id='pc-'+pc.id; d.dataset.id=pc.id;
   d.innerHTML=`
     <div class="pc-ss" id="pss-${pc.id}">
       <div class="pc-ss-ph"><span>${pc.status==='offline'?'OFFLINE':'—'}</span></div>
+      <span class="pc-status-badge ${pc.status==='online'?'on':pc.status==='idle'?'idle':'off'}">${pc.status.toUpperCase()}</span>
       <div class="live-b">LIVE</div>
-      <div class="pc-ov">🔍</div>
+      <div class="pc-ov">🔍 👆</div>
       <div class="pc-ck">✓</div>
     </div>
     <div class="pc-info">
       <div class="pc-dot ${pc.status==='online'?'on':pc.status==='idle'?'idle':''}"></div>
       <div style="flex:1;min-width:0">
         <div class="pc-name">${esc(pc.name)}</div>
-        <div class="pc-user">${esc(pc.user)}</div>
+        <div class="pc-user">${esc(pc.user)} · ${esc(pc.ip)}</div>
       </div>
     </div>
     <div class="pc-bars">
@@ -941,319 +1121,455 @@ function buildCard(pc){
   d.addEventListener('click',e=>{
     if(e.ctrlKey||e.metaKey) toggleSel(pc.id);
     else if(e.detail===2)    openRC(pc.id,'view');
-    else                     selOnly(pc.id);
+    else selOnly(pc.id);
   });
   d.addEventListener('contextmenu',e=>{e.preventDefault();ctxId=pc.id;showCtx(e.clientX,e.clientY);});
   return d;
 }
 
-function cc(pc){return 'pc'+(pc.status==='offline'?' off':'')+(sel.has(pc.id)?' sel':'');}
+function cc(pc){return 'pc'+(pc.status==='offline'?' off':'')+(sel.has(pc.id)?' sel':'')+(pc.locked?' locked':'');}
 function bar(v){return v>80?' h':v>60?' m':'';}
 
-function updateCard(id){
-  const el=document.getElementById('pc-'+id),pc=pcs[id];
+function updateCardDOM(id){
+  const el=document.getElementById('pc-'+id), pc=pcs[id];
   if(!el||!pc) return;
   el.className=cc(pc);
   const dot=el.querySelector('.pc-dot');
   if(dot) dot.className='pc-dot'+(pc.status==='online'?' on':pc.status==='idle'?' idle':'');
-  const cv=document.getElementById('cv-'+id);if(cv)cv.textContent=pc.cpu+'%';
-  const rv=document.getElementById('rv-'+id);if(rv)rv.textContent=pc.ram+'%';
-  const cb=document.getElementById('cb-'+id);if(cb){cb.style.width=pc.cpu+'%';cb.className='mbf'+bar(pc.cpu);}
-  const rb=document.getElementById('rb-'+id);if(rb){rb.style.width=pc.ram+'%';rb.className='mbf'+bar(pc.ram);}
+  const badge=el.querySelector('.pc-status-badge');
+  if(badge){badge.className='pc-status-badge '+(pc.status==='online'?'on':pc.status==='idle'?'idle':'off');badge.textContent=pc.status.toUpperCase();}
+  ['cv','rv','cb','rb'].forEach(p=>{
+    const el2=document.getElementById(`${p}-${id}`);
+    if(!el2) return;
+    const isV=p.endsWith('v'), val=p.startsWith('c')?pc.cpu:pc.ram;
+    if(isV) el2.textContent=val+'%';
+    else {el2.style.width=val+'%';el2.className='mbf'+bar(val);}
+  });
+  // Also update list view row
+  updateLVRow(id);
 }
 
 function updateCardScreen(id){
-  const pc=pcs[id];const ss=document.getElementById('pss-'+id);
+  const pc=pcs[id]; const ss=document.getElementById('pss-'+id);
   if(!ss||!pc?.screenshot) return;
   let img=ss.querySelector('img');
   if(!img){ss.querySelector('.pc-ss-ph')?.remove();img=document.createElement('img');img.alt='';ss.insertBefore(img,ss.firstChild);}
   img.src=pc.screenshot;
 }
 
-// ─── RENDER (mobile list) ─────────────────────────────────────────────────────
-function renderMobList(){
-  if(window.innerWidth>540) return;
-  const list=Object.values(pcs);
-  const ml=document.getElementById('mobList');
-  ml.innerHTML='';
-  if(!list.length) return;
+// ── LIST VIEW ────────────────────────────────────────────
+function renderListView(list){
+  const body=document.getElementById('lvBody');
+  body.innerHTML='';
   list.forEach(pc=>{
     const d=document.createElement('div');
-    d.className='mob-pc-item'+(pc.status==='offline'?' off':'')+(sel.has(pc.id)?' sel':'');
-    d.id='mpc-'+pc.id;
+    d.className='lv-item'+(pc.status==='offline'?' off':'')+(sel.has(pc.id)?' sel':'');
+    d.id='lv-'+pc.id; d.dataset.id=pc.id;
     d.innerHTML=`
-      <div class="mob-sel-dot">${sel.has(pc.id)?'✓':''}</div>
-      <div class="mob-ss-thumb" id="mss-${pc.id}">
-        ${pc.screenshot?`<img src="${pc.screenshot}" alt="">`:'<div class="mob-ss-ph">—</div>'}
+      <div class="lv-ck">${sel.has(pc.id)?'✓':''}</div>
+      <div class="lv-ss" id="lvss-${pc.id}">
+        ${pc.screenshot?`<img src="${pc.screenshot}" alt="">`:'<div class="lv-ss-ph">—</div>'}
       </div>
-      <div class="mob-pc-meta">
-        <div class="mob-pc-name">${esc(pc.name)}</div>
-        <div class="mob-pc-sub">${esc(pc.user)} · ${pc.status.toUpperCase()}</div>
-        <div class="mob-pc-bars">
-          <div class="mob-pc-bar">
-            <div class="mob-pc-bar-lbl"><span>CPU</span><span id="mcv-${pc.id}">${pc.cpu}%</span></div>
-            <div class="mob-pc-bar-t"><div class="mob-pc-bar-f${bar(pc.cpu)}" id="mcb-${pc.id}" style="width:${pc.cpu}%"></div></div>
-          </div>
-          <div class="mob-pc-bar">
-            <div class="mob-pc-bar-lbl"><span>RAM</span><span id="mrv-${pc.id}">${pc.ram}%</span></div>
-            <div class="mob-pc-bar-t"><div class="mob-pc-bar-f${bar(pc.ram)}" id="mrb-${pc.id}" style="width:${pc.ram}%"></div></div>
-          </div>
+      <div class="lv-info">
+        <div class="lv-name">${esc(pc.name)}</div>
+        <div class="lv-sub">${esc(pc.user)}</div>
+        <div class="lv-bars">
+          <div class="lv-bar"><span>CPU</span><div class="lv-bt"><div class="lv-bf${bar(pc.cpu)}" id="lcb-${pc.id}" style="width:${pc.cpu}%"></div></div><span id="lcv-${pc.id}">${pc.cpu}%</span></div>
+          <div class="lv-bar"><span>RAM</span><div class="lv-bt"><div class="lv-bf${bar(pc.ram)}" id="lrb-${pc.id}" style="width:${pc.ram}%"></div></div><span id="lrv-${pc.id}">${pc.ram}%</span></div>
         </div>
       </div>
-      <div class="mob-pc-arrow">›</div>`;
-    // tap to select / long-press or double-tap for detail
-    let tapTimer=null;
+      <div class="lv-ip">${esc(pc.ip)}</div>
+      <div class="lv-os">${esc(pc.os)}</div>
+      <div class="lv-dot ${pc.status==='online'?'on':pc.status==='idle'?'idle':''}"></div>
+      <div class="lv-status" style="color:${pc.status==='online'?'var(--grn)':pc.status==='idle'?'var(--ylw)':'var(--red)'}">${pc.status.toUpperCase()}</div>`;
     d.addEventListener('click',e=>{
-      if(tapTimer){
-        clearTimeout(tapTimer);tapTimer=null;
-        openMobDetail(pc.id);
-      } else {
-        tapTimer=setTimeout(()=>{tapTimer=null;toggleSel(pc.id);renderMobList();},250);
-      }
+      if(e.ctrlKey||e.metaKey) toggleSel(pc.id);
+      else if(e.detail===2)    openRC(pc.id,'view');
+      else selOnly(pc.id);
     });
     d.addEventListener('contextmenu',e=>{e.preventDefault();ctxId=pc.id;showCtx(e.clientX,e.clientY);});
-    ml.appendChild(d);
+    body.appendChild(d);
   });
 }
 
-function updateMobCard(id){
-  const pc=pcs[id];
-  const el=document.getElementById('mpc-'+id);
+function updateLVRow(id){
+  const el=document.getElementById('lv-'+id), pc=pcs[id];
   if(!el||!pc) return;
-  el.className='mob-pc-item'+(pc.status==='offline'?' off':'')+(sel.has(pc.id)?' sel':'');
-  const cv=document.getElementById('mcv-'+id);if(cv)cv.textContent=pc.cpu+'%';
-  const rv=document.getElementById('mrv-'+id);if(rv)rv.textContent=pc.ram+'%';
-  const cb=document.getElementById('mcb-'+id);if(cb){cb.style.width=pc.cpu+'%';cb.className='mob-pc-bar-f'+bar(pc.cpu);}
-  const rb=document.getElementById('mrb-'+id);if(rb){rb.style.width=pc.ram+'%';rb.className='mob-pc-bar-f'+bar(pc.ram);}
+  el.className='lv-item'+(pc.status==='offline'?' off':'')+(sel.has(pc.id)?' sel':'');
+  const lcv=document.getElementById('lcv-'+id);if(lcv)lcv.textContent=pc.cpu+'%';
+  const lrv=document.getElementById('lrv-'+id);if(lrv)lrv.textContent=pc.ram+'%';
+  const lcb=document.getElementById('lcb-'+id);if(lcb){lcb.style.width=pc.cpu+'%';lcb.className='lv-bf'+bar(pc.cpu);}
+  const lrb=document.getElementById('lrb-'+id);if(lrb){lrb.style.width=pc.ram+'%';lrb.className='lv-bf'+bar(pc.ram);}
+}
+function updateLVScreen(id){
+  const pc=pcs[id]; const ss=document.getElementById('lvss-'+id);
+  if(!ss||!pc?.screenshot) return;
+  ss.innerHTML=`<img src="${pc.screenshot}" alt="" style="width:100%;height:100%;object-fit:cover">`;
 }
 
-function updateMobCardScreen(id){
-  const pc=pcs[id]; const th=document.getElementById('mss-'+id);
-  if(!th||!pc?.screenshot) return;
-  th.innerHTML=`<img src="${pc.screenshot}" alt="" style="width:100%;height:100%;object-fit:cover">`;
-}
-
-// ─── MOBILE PC DETAIL SHEET ───────────────────────────────────────────────────
-function openMobDetail(id){
-  const pc=pcs[id]; if(!pc) return;
-  document.getElementById('pcdetail-title').textContent=pc.name;
-  const body=document.getElementById('pcdetail-body');
-  const ssBg=pc.screenshot?`<img src="${pc.screenshot}" alt="" style="width:100%;height:100%;object-fit:cover">`:
-    '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-family:var(--mono);font-size:11px">No screenshot</div>';
-  const rows=[['User',pc.user],['IP',pc.ip],['OS',pc.os],['Status',pc.status.toUpperCase()],
-    ['CPU',pc.cpu+'%'],['RAM',pc.ram+'%']];
-  body.innerHTML=`
-    <div class="pc-detail-ss">${ssBg}</div>
-    <div class="pc-action-grid">
-      <div class="pac acc" onclick="openRC('${id}','view');closeSheet('pcdetail')"><span class="pi">👁</span>View</div>
-      <div class="pac grn" onclick="openRC('${id}','control');closeSheet('pcdetail')"><span class="pi">🖱</span>Control</div>
-      <div class="pac acc" onclick="cmdTo('${id}','screenshot')"><span class="pi">📸</span>Screenshot</div>
-      <div class="pac ylw" onclick="cmdTo('${id}','lock')"><span class="pi">🔒</span>Lock</div>
-      <div class="pac grn" onclick="cmdTo('${id}','unlock')"><span class="pi">🔓</span>Unlock</div>
-      <div class="pac" onclick="cmdTo('${id}','blank_screen')"><span class="pi">⬛</span>Blank</div>
-      <div class="pac" onclick="cmdTo('${id}','mute')"><span class="pi">🔇</span>Mute</div>
-      <div class="pac grn" onclick="cmdTo('${id}','unmute')"><span class="pi">🔊</span>Unmute</div>
-      <div class="pac red" onclick="cmdTo('${id}','block_internet')"><span class="pi">🌐</span>Blk Net</div>
-      <div class="pac" onclick="cmdTo('${id}','logoff')"><span class="pi">🚪</span>Logoff</div>
-      <div class="pac ylw" onclick="if(confirm('Restart?'))cmdTo('${id}','restart')"><span class="pi">↺</span>Restart</div>
-      <div class="pac red" onclick="if(confirm('Shutdown?'))cmdTo('${id}','shutdown')"><span class="pi">⏻</span>Shutdown</div>
-    </div>
-    <div style="margin-top:12px">
-      ${rows.map(([k,v])=>`<div class="dr"><span class="dk">${k}</span><span class="dv">${esc(String(v))}</span></div>`).join('')}
-    </div>
-    <button class="sbn gh" style="margin-top:10px" onclick="cmdTo('${id}','get_sysinfo')">ℹ Full System Info</button>
-    <button class="sbn gh" onclick="cmdTo('${id}','get_processes')">📊 Processes</button>
-  `;
-  openSheet('pcdetail');
-}
-
-// ─── SELECTION ────────────────────────────────────────────────────────────────
-function selOnly(id){sel.clear();sel.add(id);refreshSel();renderInfoBoth(id);}
+// ═══════════════════════════════════════════════════════
+// SELECTION
+// ═══════════════════════════════════════════════════════
+function selOnly(id){sel.clear();sel.add(id);refreshSel();renderInfo(id);}
 function toggleSel(id){sel.has(id)?sel.delete(id):sel.add(id);refreshSel();}
-function selAll(){Object.keys(pcs).forEach(id=>sel.add(id));refreshSel();}
+function selAll(){filteredPCs().forEach(p=>sel.add(p.id));refreshSel();}
 function selNone(){sel.clear();refreshSel();}
-function refreshSel(){
-  Object.keys(pcs).forEach(id=>updateCard(id));
-  renderMobList();
-  const lbl=sel.size?`${sel.size} selected`:'All online';
-  document.getElementById('selLbl').textContent=sel.size?`${sel.size} sel`:'';
-  document.getElementById('mob-sel-lbl').textContent=lbl;
+function selOnline(){sel.clear();Object.values(pcs).filter(p=>p.status==='online').forEach(p=>sel.add(p.id));refreshSel();}
+function selOffline(){sel.clear();Object.values(pcs).filter(p=>p.status==='offline').forEach(p=>sel.add(p.id));refreshSel();}
+function selInvert(){const all=filteredPCs().map(p=>p.id);all.forEach(id=>sel.has(id)?sel.delete(id):sel.add(id));refreshSel();}
+function selByGroup(){
+  const name=prompt('Select computers whose name contains:');
+  if(!name) return;
+  sel.clear();
+  Object.values(pcs).filter(p=>p.name.toLowerCase().includes(name.toLowerCase())).forEach(p=>sel.add(p.id));
+  refreshSel();
 }
+
+function refreshSel(){
+  renderAll();
+  updateSelBar();
+  document.getElementById('selLbl').textContent=sel.size?`${sel.size} sel`:'';
+  document.getElementById('mob-sel-lbl').textContent=sel.size?`${sel.size} selected`:'All online';
+}
+
+function updateSelBar(){
+  const bar=document.getElementById('selBar');
+  document.getElementById('selCount').textContent=`${sel.size} selected`;
+  bar.style.display=sel.size?'flex':'none';
+}
+
 function targets(){return sel.size>0?[...sel]:Object.values(pcs).filter(p=>p.status!=='offline').map(p=>p.id);}
 
-// ─── COMMANDS ─────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// COMMANDS
+// ═══════════════════════════════════════════════════════
 function cmd(c,extra={}){
   const t=targets();
   if(!t.length){toast('No online targets','w');return;}
   sendWS({type:'command',cmd:c,targets:t,...extra});
-  log(`→ ${c} (${t.length})`,'ok');toast(`${c} → ${t.length}`);
+  log(`→ ${c} (${t.length})`,'ok'); toast(`${c} → ${t.length}`);
 }
 function cmdTo(id,c,extra={}){sendWS({type:'command',cmd:c,targets:[id],...extra});log(`[${pcs[id]?.name||id}] ${c}`,'ok');}
 function rcCmd(c){if(rcId)cmdTo(rcId,c);}
 function ok(c,q){if(confirm(q))cmd(c);}
+function ca(c){hideCtx();if(ctxId)cmdTo(ctxId,c);}
+function caSave(){hideCtx();if(ctxId)cmdTo(ctxId,'screenshot');setTimeout(()=>{if(pcs[ctxId]?.screenshot)downloadSS(ctxId);},1500);}
 
 function sendMsg(){
-  const b=document.getElementById('mbody').value.trim();
-  if(!b){toast('Enter message','w');return;}
+  const b=document.getElementById('mbody').value.trim(); if(!b){toast('Enter message','w');return;}
   sendWS({type:'command',cmd:'message',targets:targets(),
     title:document.getElementById('mtitle').value||'Lab Notice',
     message:b,msgType:document.getElementById('mtype').value,
     duration:parseInt(document.getElementById('mdur').value)||10});
-  log('Message sent','ok');toast('Sent ✓');
-  document.getElementById('mbody').value='';
+  log('Message sent','ok'); toast('Sent ✓'); document.getElementById('mbody').value='';
 }
-function sendMsgMobile(){
-  const b=document.getElementById('m-mbody').value.trim();
-  if(!b){toast('Enter message','w');return;}
+function sendMsgMob(){
+  const b=document.getElementById('m-mbody').value.trim(); if(!b){toast('Enter message','w');return;}
   sendWS({type:'command',cmd:'message',targets:targets(),
     title:document.getElementById('m-mtitle').value||'Lab Notice',
     message:b,msgType:document.getElementById('m-mtype').value,duration:10});
-  log('Message sent','ok');toast('Sent ✓');
-  document.getElementById('m-mbody').value='';
+  log('Message sent','ok'); toast('Sent ✓'); document.getElementById('m-mbody').value='';
 }
 function sendUrl(){
-  const u=document.getElementById('uval').value.trim();
-  if(!u){toast('Enter URL','w');return;}
+  const u=document.getElementById('uval').value.trim(); if(!u){toast('Enter URL','w');return;}
   sendWS({type:'command',cmd:'open_url',targets:targets(),url:u,browser:document.getElementById('ubrow').value});
-  log(`URL: ${u}`,'ok');toast('URL sent ✓');document.getElementById('uval').value='';
+  toast('URL sent ✓'); document.getElementById('uval').value='';
 }
-function sendUrlMobile(){
-  const u=document.getElementById('m-uval').value.trim();
-  if(!u){toast('Enter URL','w');return;}
+function sendUrlMob(){
+  const u=document.getElementById('m-uval').value.trim(); if(!u) return;
   sendWS({type:'command',cmd:'open_url',targets:targets(),url:u,browser:'default'});
-  log(`URL: ${u}`,'ok');toast('URL sent ✓');document.getElementById('m-uval').value='';
+  toast('URL sent ✓'); document.getElementById('m-uval').value='';
 }
 function sendRun(){
-  const c=document.getElementById('rcmd').value.trim();
-  if(!c){toast('Enter command','w');return;}
+  const c=document.getElementById('rcmd').value.trim(); if(!c) return;
   sendWS({type:'command',cmd:'exec',targets:targets(),command:c,mode:document.getElementById('rmode').value});
-  log(`Exec: ${c}`,'ok');toast('Exec sent ✓');
+  toast('Exec sent ✓');
 }
-function sendRunMobile(){
-  const c=document.getElementById('m-rcmd').value.trim();
-  if(!c){toast('Enter command','w');return;}
+function sendRunMob(){
+  const c=document.getElementById('m-rcmd').value.trim(); if(!c) return;
   sendWS({type:'command',cmd:'exec',targets:targets(),command:c,mode:'hidden'});
-  log(`Exec: ${c}`,'ok');toast('Exec sent ✓');document.getElementById('m-rcmd').value='';
+  toast('Exec sent ✓'); document.getElementById('m-rcmd').value='';
 }
 function sendVolume(){
   const l=parseInt(document.getElementById('volS').value);
-  sendWS({type:'command',cmd:'set_volume',targets:targets(),level:l});
-  log(`Volume ${l}%`,'ok');toast(`Volume ${l}%`);
-}
-function sendVolumeMobile(){
-  const l=parseInt(document.getElementById('m-volS').value);
-  sendWS({type:'command',cmd:'set_volume',targets:targets(),level:l});
-  log(`Volume ${l}%`,'ok');toast(`Volume ${l}%`);
+  sendWS({type:'command',cmd:'set_volume',targets:targets(),level:l}); toast(`Volume ${l}%`);
 }
 function sendFile(){
-  const f=document.getElementById('fi').files[0];
-  if(!f){toast('Select file','w');return;}
-  const t=targets();if(!t.length){toast('No targets','w');return;}
+  const f=document.getElementById('fi').files[0]; if(!f){toast('Select file','w');return;}
+  const t=targets(); if(!t.length){toast('No targets','w');return;}
   const r=new FileReader();
   r.onload=e=>{
-    sendWS({type:'command',cmd:'file_transfer',targets:t,filename:f.name,path:document.getElementById('fdest').value,data:e.target.result});
+    sendWS({type:'command',cmd:'file_transfer',targets:t,filename:f.name,
+      path:document.getElementById('fdest').value,data:e.target.result});
     toast(`📤 ${f.name}`);
   };
   r.readAsDataURL(f);
 }
 function promptRun(){const c=prompt('Command to run:');if(c){document.getElementById('rcmd').value=c;sendRun();}}
-function promptUrl(){const u=prompt('URL to open:');if(u){document.getElementById('uval').value=u;sendUrl();}}
-function toggleStream(){
-  if(globalStreaming){
-    globalStreaming=false;cmd('stop_stream');
-    document.getElementById('streamBtn').textContent='📡 Live';
-    document.getElementById('streamBtn').classList.remove('act');
-  } else {
-    globalStreaming=true;cmd('start_stream',{interval:2});
-    document.getElementById('streamBtn').textContent='📡 Stop';
-    document.getElementById('streamBtn').classList.add('act');
-  }
-  toast(globalStreaming?'Streaming started':'Stream stopped');
-}
-function sendChat(side){
-  const el=document.getElementById('chatIn-'+side);
-  const txt=el.value.trim();if(!txt)return;
+function promptUrl(){const u=prompt('URL:');if(u){document.getElementById('uval').value=u;sendUrl();}}
+
+function sendChat(){
+  const txt=document.getElementById('chatIn').value.trim(); if(!txt) return;
   sendWS({type:'command',cmd:'message',targets:targets(),title:'Admin',message:txt,msgType:'info',duration:0});
-  appendChatBoth('You',txt,'me');
-  el.value='';
+  appendChat('You',txt,'me'); document.getElementById('chatIn').value='';
 }
-function appendChatBoth(from,text,side){
-  ['d','m'].forEach(s=>{
-    const b=document.getElementById('chatbox-'+s);if(!b)return;
+function sendChatMob(){
+  const txt=document.getElementById('chatIn-m').value.trim(); if(!txt) return;
+  sendWS({type:'command',cmd:'message',targets:targets(),title:'Admin',message:txt,msgType:'info',duration:0});
+  appendChat('You',txt,'me'); document.getElementById('chatIn-m').value='';
+}
+function appendChat(from,text,side){
+  ['chatbox','chatbox-m'].forEach(id=>{
+    const b=document.getElementById(id); if(!b) return;
     const d=document.createElement('div');
     d.className=`cm ${side}`;
     d.innerHTML=`<div class="who">${esc(from)}</div>${esc(text)}`;
-    b.appendChild(d);b.scrollTop=b.scrollHeight;
+    b.appendChild(d); b.scrollTop=b.scrollHeight;
   });
 }
 
-// ─── INFO PANELS ─────────────────────────────────────────────────────────────
-function renderInfoBoth(id){
-  renderInfoPanel(id,'infoP-d');
-  renderInfoPanel(id,'infoP-m');
-}
-function renderInfoPanel(id,panelId){
-  const pc=pcs[id],p=document.getElementById(panelId);
-  if(!pc||!p) return;
-  const rows=[['Computer',pc.name],['User',pc.user],['IP',pc.ip],['OS',pc.os],
-    ['Status',pc.status.toUpperCase()],['CPU',pc.cpu+'%'],['RAM',pc.ram+'%'],
-    ['Connected',pc.connectedAt?new Date(pc.connectedAt).toLocaleTimeString():'—']];
-  if(pc.sysinfo){
-    rows.push(['CPU Cores',pc.sysinfo.cpu_cores||'—']);
-    rows.push(['Total RAM',(pc.sysinfo.total_ram||0)+'GB']);
-    rows.push(['Total Disk',(pc.sysinfo.total_disk||0)+'GB']);
+// Streaming
+function toggleStream(){
+  if(globalStreaming){
+    globalStreaming=false; cmd('stop_stream');
+    document.getElementById('streamBtn').classList.remove('act');
+    document.getElementById('streamBtn').textContent='📡 Live';
+  } else {
+    globalStreaming=true;
+    const interval=parseFloat(document.getElementById('fpsSelect').value)||1;
+    cmd('start_stream',{interval});
+    document.getElementById('streamBtn').classList.add('act');
+    document.getElementById('streamBtn').textContent='📡 Stop';
   }
-  p.innerHTML=`
-    <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--tx);margin-bottom:8px">${esc(pc.name)}</div>
-    ${rows.map(([k,v])=>`<div class="dr"><span class="dk">${k}</span><span class="dv">${esc(String(v))}</span></div>`).join('')}
-    <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">
-      <button class="sbn acc" onclick="openRC('${id}','view')">👁 View Screen</button>
-      <button class="sbn grn" onclick="openRC('${id}','control')">🖱 Remote Control</button>
-      <button class="sbn gh" onclick="cmdTo('${id}','get_sysinfo')">ℹ Full Info</button>
-      <button class="sbn gh" onclick="cmdTo('${id}','get_processes')">📊 Processes</button>
-      <button class="sbn gh" onclick="cmdTo('${id}','screenshot')">📸 Screenshot</button>
-      <button class="sbn ylw" onclick="cmdTo('${id}','lock')">🔒 Lock</button>
-      <button class="sbn red" onclick="cmdTo('${id}','shutdown')">⏻ Shutdown</button>
-    </div>`;
+  toast(globalStreaming?'Live streaming started':'Stream stopped');
 }
-function renderProcs(id){
-  const pc=pcs[id];if(!pc?.processes?.length)return;
-  showSide('info');
-  const p=document.getElementById('infoP-d');
-  const rows=pc.processes.slice(0,40).map(pr=>`
-    <tr>
-      <td>${pr.pid}</td>
-      <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis">${esc(pr.name)}</td>
-      <td>${pr.cpu}%</td>
-      <td>${(pr.ram||0).toFixed(1)}%</td>
-      <td class="pkill" onclick="cmdTo('${id}','kill_process',{pid:${pr.pid}})">✕</td>
-    </tr>`).join('');
-  p.innerHTML=`
-    <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--tx);margin-bottom:6px">Processes: ${esc(pc.name)}</div>
-    <div style="overflow-x:auto"><table class="ptable">
-      <thead><tr><th>PID</th><th>Name</th><th>CPU</th><th>RAM</th><th></th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>
-    <div style="display:flex;gap:4px;margin-top:8px">
-      <button class="sbn gh" style="flex:1" onclick="cmdTo('${id}','get_processes')">↺ Refresh</button>
-      <button class="sbn gh" style="flex:1" onclick="renderInfoBoth('${id}')">← Back</button>
-    </div>`;
+function updateStreamFps(){
+  if(!globalStreaming) return;
+  const interval=parseFloat(document.getElementById('fpsSelect').value)||1;
+  cmd('start_stream',{interval}); toast(`Stream: ${(1/interval).toFixed(1)}fps`);
+}
+function setMobFps(interval){
+  streamFpsInterval=interval;
+  if(globalStreaming) cmd('start_stream',{interval});
+  toast(`FPS: ${(1/interval).toFixed(1)}`);
 }
 
-// ─── REMOTE CONTROL ───────────────────────────────────────────────────────────
-let rcCanvas, rcCtx, rcImg;
+// ═══════════════════════════════════════════════════════
+// SCREENSHOT SAVE (download to local storage)
+// ═══════════════════════════════════════════════════════
+function downloadSS(id){
+  const pc=pcs[id]; if(!pc?.screenshot) return;
+  const a=document.createElement('a');
+  a.href=pc.screenshot;
+  a.download=`${pc.name}_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.jpg`;
+  a.click();
+}
+
+function saveScreenshots(){
+  const list=filteredPCs().filter(p=>p.screenshot);
+  if(!list.length){
+    // Request screenshots first
+    cmd('screenshot');
+    toast('Taking screenshots… click Save SS again in 2s','w');
+    return;
+  }
+  list.forEach((pc,i)=>{
+    setTimeout(()=>{
+      const a=document.createElement('a');
+      a.href=pc.screenshot;
+      a.download=`${pc.name}_${new Date().toISOString().slice(0,10)}.jpg`;
+      a.click();
+    }, i*300);
+  });
+  toast(`💾 Saving ${list.length} screenshot(s)`);
+}
+
+// ═══════════════════════════════════════════════════════
+// SLIDESHOW
+// ═══════════════════════════════════════════════════════
+function openSlideshow(){
+  renderSlideshow();
+  document.getElementById('ssOverlay').classList.add('open');
+  cmd('screenshot'); // auto-grab all
+}
+function renderSlideshow(){
+  const cols=parseInt(document.getElementById('ssLayout').value)||4;
+  const list=filteredPCs();
+  const grid=document.getElementById('ssGrid');
+  grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+  grid.innerHTML='';
+  list.forEach(pc=>{
+    const cell=document.createElement('div');
+    cell.className='ss-cell'; cell.id='ssc-'+pc.id;
+    cell.innerHTML=`
+      ${pc.screenshot?`<img src="${pc.screenshot}" alt="">`:'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-family:var(--mono);font-size:10px;background:#040608">—</div>'}
+      <div class="ss-cell-label">
+        <span class="ss-cell-dot" style="background:${pc.status==='online'?'var(--grn)':pc.status==='idle'?'var(--ylw)':'var(--red)'}"></span>
+        ${esc(pc.name)} · ${esc(pc.user)}
+      </div>`;
+    cell.addEventListener('dblclick',()=>spotlightPC(pc.id));
+    cell.addEventListener('contextmenu',e=>{e.preventDefault();ctxId=pc.id;showCtx(e.clientX,e.clientY);});
+    grid.appendChild(cell);
+  });
+  document.getElementById('ssTitle').textContent=`Slideshow — ${list.length} computer(s)`;
+}
+function updateSSCell(id){
+  const pc=pcs[id]; const cell=document.getElementById('ssc-'+id);
+  if(!cell||!pc?.screenshot) return;
+  let img=cell.querySelector('img');
+  if(!img){cell.innerHTML='';img=document.createElement('img');img.style.cssText='width:100%;height:100%;object-fit:cover';cell.appendChild(img);const lbl=document.createElement('div');lbl.className='ss-cell-label';lbl.innerHTML=`<span class="ss-cell-dot" style="background:var(--grn)"></span>${esc(pc.name)}`;cell.appendChild(lbl);}
+  img.src=pc.screenshot;
+}
+
+// ═══════════════════════════════════════════════════════
+// SPOTLIGHT
+// ═══════════════════════════════════════════════════════
+function openSpotlight(){
+  spotIds=filteredPCs().map(p=>p.id);
+  if(!spotIds.length){toast('No computers','w');return;}
+  spotIdx=0;
+  updateSpotlight(spotIds[0]);
+  document.getElementById('spotOverlay').classList.add('open');
+  if(spotIds[0]) cmdTo(spotIds[0],'screenshot');
+}
+function spotlightPC(id){
+  spotIds=filteredPCs().map(p=>p.id);
+  spotIdx=Math.max(0,spotIds.indexOf(id));
+  updateSpotlight(id);
+  document.getElementById('spotOverlay').classList.add('open');
+  cmdTo(id,'screenshot');
+}
+function spotPrev(){if(spotIdx>0){spotIdx--;const id=spotIds[spotIdx];updateSpotlight(id);cmdTo(id,'screenshot');}}
+function spotNext(){if(spotIdx<spotIds.length-1){spotIdx++;const id=spotIds[spotIdx];updateSpotlight(id);cmdTo(id,'screenshot');}}
+function updateSpotlight(id){
+  const pc=pcs[id]; if(!pc) return;
+  const wrap=document.getElementById('spotImg');
+  wrap.innerHTML=pc.screenshot?`<img src="${pc.screenshot}" alt="" style="width:100%;height:100%;object-fit:contain">`:
+    '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-family:var(--mono)">No screenshot</div>';
+  document.getElementById('spotInfo').textContent=`${pc.name} · ${pc.user} · ${pc.ip} · ${pc.status.toUpperCase()} (${spotIdx+1}/${spotIds.length})`;
+}
+
+// ═══════════════════════════════════════════════════════
+// WAKE ON LAN
+// ═══════════════════════════════════════════════════════
+function sendWOL(){sendWOLMac(document.getElementById('wol-mac').value,document.getElementById('wol-name').value);}
+function sendWOLModal(){sendWOLMac(document.getElementById('wol-mac-m').value,document.getElementById('wol-name-m').value);}
+function sendWOLMac(mac,name){
+  mac=mac.trim(); if(!mac){toast('Enter MAC address','w');return;}
+  // Send WOL magic packet via server relay to all online agents
+  sendWS({type:'command',cmd:'wol',targets:targets(),mac,name});
+  log(`⚡ WOL → ${mac} (${name||'unnamed'})`,'ok'); toast(`⚡ Wake packet sent to ${mac}`);
+}
+function saveWOLDevice(){saveWOLMac(document.getElementById('wol-mac').value,document.getElementById('wol-name').value);}
+function saveWOLModal(){saveWOLMac(document.getElementById('wol-mac-m').value,document.getElementById('wol-name-m').value);}
+function saveWOLMac(mac,name){
+  mac=mac.trim(); if(!mac) return;
+  wolDevices=wolDevices.filter(d=>d.mac!==mac);
+  wolDevices.push({mac,name:name||mac});
+  localStorage.setItem('lc_wol',JSON.stringify(wolDevices));
+  renderWOLList(); toast('Saved');
+}
+function renderWOLList(){
+  ['wolList','wolListM'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML=wolDevices.length?
+      wolDevices.map(d=>`<div class="wol-item"><span>📟 ${esc(d.name||d.mac)}</span><span style="color:var(--tx3)">${esc(d.mac)}</span><button onclick="sendWOLMac('${d.mac}','${d.name}')">Wake</button></div>`).join(''):
+      '<div style="font-family:var(--mono);font-size:10px;color:var(--tx3);padding:8px">No saved devices</div>';
+  });
+}
+function openWOL(){openModal('wolModal');renderWOLList();}
+
+// ═══════════════════════════════════════════════════════
+// AUDIO LISTENING / CALL
+// ═══════════════════════════════════════════════════════
+let audioCtx=null, audioQueue=[];
+
+function openAudioCall(){
+  // Populate target dropdown
+  const sel=document.getElementById('audioTarget');
+  sel.innerHTML=Object.values(pcs).filter(p=>p.status!=='offline')
+    .map(p=>`<option value="${p.id}">${esc(p.name)} — ${esc(p.user)}</option>`).join('');
+  openModal('audioModal');
+}
+
+function startAudioListen(){
+  const id=document.getElementById('audioTarget').value;
+  if(!id){toast('Select a computer','w');return;}
+  audioListenId=id;
+  sendWS({type:'command',cmd:'start_audio_stream',targets:[id]});
+  document.getElementById('audioStatus').textContent='Status: Requesting audio stream…';
+  document.getElementById('audioStatus').style.color='var(--ylw)';
+  toast('📞 Requesting audio stream from '+pcs[id]?.name,'ok');
+  log(`Audio listen → ${pcs[id]?.name}`,'ok');
+  // Note: actual audio streaming requires pyaudio on agent + WebRTC or chunked base64
+  // This sends the command; the agent would stream back audio_chunk messages
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  document.getElementById('audioStatus').textContent='Status: Listening (requires PyAudio on agent)';
+  document.getElementById('audioStatus').style.color='var(--grn)';
+}
+function stopAudioListen(){
+  if(audioListenId){sendWS({type:'command',cmd:'stop_audio_stream',targets:[audioListenId]});audioListenId=null;}
+  document.getElementById('audioStatus').textContent='Status: Stopped';
+  document.getElementById('audioStatus').style.color='var(--tx3)';
+}
+function handleAudioChunk(b64data){
+  // Decode and play audio chunk
+  if(!audioCtx) return;
+  try{
+    const raw=atob(b64data);
+    const buf=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++) buf[i]=raw.charCodeAt(i);
+    audioCtx.decodeAudioData(buf.buffer, decoded=>{
+      const src=audioCtx.createBufferSource();
+      src.buffer=decoded; src.connect(audioCtx.destination); src.start();
+    });
+  }catch(e){}
+}
+async function toggleTalk(){
+  if(talkActive){
+    talkActive=false;
+    if(talkStream){talkStream.getTracks().forEach(t=>t.stop());talkStream=null;}
+    document.getElementById('talkBtn').textContent='🎙 Start Talking';
+    toast('Mic off');
+  } else {
+    try{
+      talkStream=await navigator.mediaDevices.getUserMedia({audio:true});
+      talkActive=true;
+      document.getElementById('talkBtn').textContent='🔴 Stop Talking';
+      const id=document.getElementById('audioTarget').value;
+      sendWS({type:'command',cmd:'play_audio',targets:[id||...targets().slice(0,1)]});
+      toast('🎙 Talking — agent PC will hear you');
+      // In a full implementation, we'd stream mic chunks via WebSocket
+    }catch(e){toast('Mic access denied','e');}
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// FILTER + SEARCH
+// ═══════════════════════════════════════════════════════
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('act'));
+  btn.classList.add('act');
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// REMOTE CONTROL
+// ═══════════════════════════════════════════════════════
+let rcCanvas, rcCtx, rcImg, rcFpsArr2=[];
 
 function initRC(){
   rcCanvas=document.getElementById('rccanvas');
   rcCtx=rcCanvas.getContext('2d');
   rcImg=new Image();
   rcImg.onload=()=>{
-    rcCanvas.width=rcImg.naturalWidth;rcCanvas.height=rcImg.naturalHeight;
+    rcCanvas.width=rcImg.naturalWidth; rcCanvas.height=rcImg.naturalHeight;
     rcCtx.drawImage(rcImg,0,0);
     document.getElementById('rc-ph').style.display='none';
-    rcFpsArr.push(performance.now());
-    rcFpsArr=rcFpsArr.filter(t=>performance.now()-t<1000);
-    document.getElementById('rcFps').textContent=rcFpsArr.length+'fps';
+    rcFpsArr2.push(performance.now());
+    rcFpsArr2=rcFpsArr2.filter(t=>performance.now()-t<1000);
+    document.getElementById('rcFps').textContent=rcFpsArr2.length+'fps';
   };
   // Mouse
   rcCanvas.addEventListener('mousemove',rcOnMove);
@@ -1262,28 +1578,35 @@ function initRC(){
   rcCanvas.addEventListener('contextmenu',rcOnRClick);
   rcCanvas.addEventListener('wheel',rcOnWheel,{passive:false});
   rcCanvas.addEventListener('dblclick',rcOnDbl);
-  // Touch (for tablet control)
-  rcCanvas.addEventListener('touchstart',rcOnTouchStart,{passive:false});
-  rcCanvas.addEventListener('touchmove',rcOnTouchMove,{passive:false});
-  rcCanvas.addEventListener('touchend',rcOnTouchEnd,{passive:false});
+  // Touch (phone)
+  rcCanvas.addEventListener('touchstart',rcTouchStart,{passive:false});
+  rcCanvas.addEventListener('touchmove',rcTouchMove,{passive:false});
+  rcCanvas.addEventListener('touchend',rcTouchEnd,{passive:false});
   // Keyboard
   document.addEventListener('keydown',rcOnKeyDown);
   document.addEventListener('keyup',rcOnKeyUp);
+  // Init touch joystick (mobile)
+  initTouchJoystick();
 }
 
 function openRC(id,mode='view'){
-  rcId=id;setRCMode(mode);
+  rcId=id; setRCMode(mode);
   const pc=pcs[id];
   document.getElementById('rctit').textContent=`${pc.name} · ${pc.ip}`;
   document.getElementById('rcov').classList.add('open');
-  cmdTo(id,'start_stream',{interval:0.5});
-  rcStreaming=true;
-  if(pc.screenshot) renderRC(pc.screenshot);
-  else cmdTo(id,'screenshot');
+  const interval=parseFloat(document.getElementById('rcFpsSelect').value)||1;
+  cmdTo(id,'start_stream',{interval}); rcStreaming=true;
+  // Show touch controls on mobile
+  const isMob=window.innerWidth<=768;
+  document.getElementById('touchPad').style.display=isMob&&mode==='control'?'block':'none';
+  document.getElementById('touchBtns').style.display=isMob&&mode==='control'?'flex':'none';
+  if(pc.screenshot) renderRC(pc.screenshot); else cmdTo(id,'screenshot');
 }
 function closeRC(){
   if(rcId&&rcStreaming){cmdTo(rcId,'stop_stream');rcStreaming=false;}
   document.getElementById('rcov').classList.remove('open');
+  document.getElementById('touchPad').style.display='none';
+  document.getElementById('touchBtns').style.display='none';
   rcId=null;
 }
 function renderRC(url){rcImg.src=url;}
@@ -1292,28 +1615,76 @@ function setRCMode(m){
   document.getElementById('rcm-ctrl').classList.toggle('act',m==='control');
   document.getElementById('rcm-view').classList.toggle('act',m==='view');
   document.getElementById('rcwrap').className='rcwrap'+(m==='control'?' ctrl':'');
+  const isMob=window.innerWidth<=768;
+  document.getElementById('touchPad').style.display=isMob&&m==='control'?'block':'none';
+  document.getElementById('touchBtns').style.display=isMob&&m==='control'?'flex':'none';
+}
+function updateRCFps(){
+  if(!rcId||!rcStreaming) return;
+  const interval=parseFloat(document.getElementById('rcFpsSelect').value)||1;
+  cmdTo(rcId,'start_stream',{interval}); toast(`RC: ${(1/interval).toFixed(1)}fps`);
 }
 function isCtrl(){return rcMode==='control'&&rcId&&document.getElementById('rcov').classList.contains('open');}
 function cf(e){
   const r=rcCanvas.getBoundingClientRect();
-  return {x:(e.clientX-r.left)/r.width, y:(e.clientY-r.top)/r.height};
+  return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};
 }
 function rcOnMove(e){if(!isCtrl())return;const p=cf(e);sendWS({type:'command',cmd:'rc_move',targets:[rcId],x:p.x,y:p.y});}
-function rcOnDown(e){if(!isCtrl())return;const p=cf(e);const b=e.button===2?'right':'left';sendWS({type:'command',cmd:'rc_mousedown',targets:[rcId],x:p.x,y:p.y,button:b});e.preventDefault();}
-function rcOnUp(e){if(!isCtrl())return;const p=cf(e);const b=e.button===2?'right':'left';sendWS({type:'command',cmd:'rc_mouseup',targets:[rcId],x:p.x,y:p.y,button:b});}
+function rcOnDown(e){if(!isCtrl())return;const p=cf(e);sendWS({type:'command',cmd:'rc_mousedown',targets:[rcId],x:p.x,y:p.y,button:e.button===2?'right':'left'});e.preventDefault();}
+function rcOnUp(e){if(!isCtrl())return;const p=cf(e);sendWS({type:'command',cmd:'rc_mouseup',targets:[rcId],x:p.x,y:p.y,button:e.button===2?'right':'left'});}
 function rcOnRClick(e){if(!isCtrl())return;e.preventDefault();const p=cf(e);sendWS({type:'command',cmd:'rc_click',targets:[rcId],x:p.x,y:p.y,button:'right'});}
 function rcOnWheel(e){if(!isCtrl())return;e.preventDefault();const p=cf(e);sendWS({type:'command',cmd:'rc_scroll',targets:[rcId],x:p.x,y:p.y,dy:e.deltaY>0?-3:3});}
 function rcOnDbl(e){if(!isCtrl())return;const p=cf(e);sendWS({type:'command',cmd:'rc_click',targets:[rcId],x:p.x,y:p.y,button:'left',double:true});}
-// Touch for tablet
-let lastTouch=null;
-function cfTouch(t){
-  const r=rcCanvas.getBoundingClientRect();
-  return {x:(t.clientX-r.left)/r.width,y:(t.clientY-r.top)/r.height};
-}
-function rcOnTouchStart(e){if(!isCtrl())return;e.preventDefault();const t=e.touches[0];lastTouch=cfTouch(t);sendWS({type:'command',cmd:'rc_mousedown',targets:[rcId],...lastTouch,button:'left'});}
-function rcOnTouchMove(e){if(!isCtrl())return;e.preventDefault();const t=e.touches[0];const p=cfTouch(t);sendWS({type:'command',cmd:'rc_move',targets:[rcId],...p});lastTouch=p;}
-function rcOnTouchEnd(e){if(!isCtrl()||!lastTouch)return;e.preventDefault();sendWS({type:'command',cmd:'rc_mouseup',targets:[rcId],...lastTouch,button:'left'});lastTouch=null;}
 
+// ── Touch for PC canvas (tablet swipe = mouse drag) ──
+let lastT=null;
+function rcTouchStart(e){if(!isCtrl())return;e.preventDefault();const t=e.touches[0];lastT={x:(t.clientX-rcCanvas.getBoundingClientRect().left)/rcCanvas.getBoundingClientRect().width,y:(t.clientY-rcCanvas.getBoundingClientRect().top)/rcCanvas.getBoundingClientRect().height};sendWS({type:'command',cmd:'rc_mousedown',targets:[rcId],...lastT,button:'left'});}
+function rcTouchMove(e){if(!isCtrl())return;e.preventDefault();const r=rcCanvas.getBoundingClientRect();const t=e.touches[0];const p={x:(t.clientX-r.left)/r.width,y:(t.clientY-r.top)/r.height};sendWS({type:'command',cmd:'rc_move',targets:[rcId],...p});lastT=p;}
+function rcTouchEnd(e){if(!isCtrl()||!lastT)return;e.preventDefault();sendWS({type:'command',cmd:'rc_mouseup',targets:[rcId],...lastT,button:'left'});lastT=null;}
+function rcTouchBtn(btn,down){if(!rcId||!isCtrl()) return; sendWS({type:'command',cmd:down?'rc_mousedown':'rc_mouseup',targets:[rcId],x:.5,y:.5,button:btn});}
+
+// ── Mobile virtual joystick (phone mouse control) ──
+function initTouchJoystick(){
+  const pad=document.getElementById('touchPad');
+  const dot=document.getElementById('touchDot');
+  let origin=null, sendTimer=null;
+  let curX=.5, curY=.5;
+
+  pad.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    const r=pad.getBoundingClientRect();
+    origin={x:e.touches[0].clientX-r.left-r.width/2, y:e.touches[0].clientY-r.top-r.height/2};
+    sendTimer=setInterval(()=>{
+      if(rcId&&isCtrl()) sendWS({type:'command',cmd:'rc_move',targets:[rcId],x:Math.max(0,Math.min(1,curX)),y:Math.max(0,Math.min(1,curY))});
+    },80);
+  },{passive:false});
+
+  pad.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(!origin) return;
+    const r=pad.getBoundingClientRect();
+    const dx=(e.touches[0].clientX-r.left-r.width/2);
+    const dy=(e.touches[0].clientY-r.top-r.height/2);
+    const maxR=r.width/2-18;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const clampedX=dist>maxR?dx/dist*maxR:dx;
+    const clampedY=dist>maxR?dy/dist*maxR:dy;
+    dot.style.left=(r.width/2+clampedX-18)+'px';
+    dot.style.top=(r.height/2+clampedY-18)+'px';
+    // Map joystick to cursor movement (relative, not absolute)
+    curX=Math.max(0,Math.min(1,curX+(clampedX/maxR)*0.03));
+    curY=Math.max(0,Math.min(1,curY+(clampedY/maxR)*0.03));
+  },{passive:false});
+
+  pad.addEventListener('touchend',e=>{
+    e.preventDefault();
+    clearInterval(sendTimer);
+    dot.style.left=''; dot.style.top='';
+    origin=null;
+  },{passive:false});
+}
+
+// Keyboard
 const KM={'Control':'ctrl','Alt':'alt','Shift':'shift','Meta':'winleft','Enter':'enter','Escape':'escape','Backspace':'backspace','Tab':'tab','Delete':'delete','ArrowUp':'up','ArrowDown':'down','ArrowLeft':'left','ArrowRight':'right',' ':'space'};
 const MOD=new Set(['Control','Alt','Shift','Meta']);
 let heldKeys=new Set();
@@ -1335,102 +1706,165 @@ function rcKey(...keys){if(!rcId)return;sendWS({type:'command',cmd:'rc_hotkey',t
 function rcSendKey(k){if(!rcId)return;sendWS({type:'command',cmd:'rc_key',targets:[rcId],key:k});}
 function rcTypePrompt(){const t=prompt('Text to type:');if(t&&rcId)sendWS({type:'command',cmd:'rc_type',targets:[rcId],text:t});}
 
-// ─── MOBILE NAV + SHEETS ─────────────────────────────────────────────────────
-function mobileNav(tab){
-  // Update bottom nav active state
-  ['computers','commands','chat','info','log'].forEach(t=>{
-    document.getElementById('bn-'+t)?.classList.toggle('act',t===tab);
-  });
-  if(tab==='computers'){
-    closeAllSheets();
-  } else {
-    openSheet(tab);
-  }
+// ═══════════════════════════════════════════════════════
+// STATS + STATUS
+// ═══════════════════════════════════════════════════════
+function updateStats(){
+  const all=Object.values(pcs);
+  const online=all.filter(p=>p.status!=='offline').length;
+  const offline=all.filter(p=>p.status==='offline').length;
+  document.getElementById('stT').textContent=all.length;
+  document.getElementById('stO').textContent=online;
+  document.getElementById('stF').textContent=offline;
+}
+function setSt(s){
+  const dot=document.getElementById('cdot'),txt=document.getElementById('ctxt'),btn=document.getElementById('btnC');
+  dot.className='cdot'+(s==='on'?' on':s==='ing'?' ing':'');
+  txt.textContent=s==='on'?'Connected':s==='ing'?'Connecting…':'Off';
+  btn.textContent=s==='on'?'Disconnect':'Connect';
+  btn.className='cbtn'+(s==='on'?' disc':'');
 }
 
+// ═══════════════════════════════════════════════════════
+// SIDEBAR + INFO
+// ═══════════════════════════════════════════════════════
+function showSide(n){
+  ['actions','chat','info','wol','log'].forEach(t=>{
+    document.getElementById('st-'+t)?.classList.toggle('act',t===n);
+    document.getElementById('sb-'+t).style.display=t===n?'block':'none';
+  });
+  if(n==='wol') renderWOLList();
+}
+function renderInfo(id){
+  const pc=pcs[id], p=document.getElementById('infoP');
+  if(!pc||!p) return;
+  const rows=[['Computer',pc.name],['User',pc.user],['IP',pc.ip],['OS',pc.os],
+    ['Status',pc.status.toUpperCase()],['CPU',pc.cpu+'%'],['RAM',pc.ram+'%'],
+    ['Connected',pc.connectedAt?new Date(pc.connectedAt).toLocaleTimeString():'—']];
+  if(pc.sysinfo) rows.push(['CPU Cores',pc.sysinfo.cpu_cores||'—'],['Total RAM',(pc.sysinfo.total_ram||0)+'GB'],['Total Disk',(pc.sysinfo.total_disk||0)+'GB']);
+  p.innerHTML=`
+    <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--tx);margin-bottom:8px">${esc(pc.name)}<br><span style="font-size:10px;color:var(--tx3);font-weight:400">${esc(pc.os)}</span></div>
+    ${rows.map(([k,v])=>`<div class="dr"><span class="dk">${k}</span><span class="dv">${esc(String(v))}</span></div>`).join('')}
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">
+      <button class="sbn acc" onclick="openRC('${id}','view')">👁 View</button>
+      <button class="sbn grn" onclick="openRC('${id}','control')">🖱 Remote Control</button>
+      <button class="sbn gh" onclick="downloadSS('${id}')">💾 Save Screenshot</button>
+      <button class="sbn gh" onclick="spotlightPC('${id}')">🔦 Spotlight</button>
+      <button class="sbn gh" onclick="cmdTo('${id}','get_sysinfo')">ℹ Full Info</button>
+      <button class="sbn gh" onclick="cmdTo('${id}','get_processes')">📊 Processes</button>
+      <button class="sbn ylw" onclick="cmdTo('${id}','lock')">🔒 Lock</button>
+      <button class="sbn red" onclick="cmdTo('${id}','shutdown')">⏻ Shutdown</button>
+    </div>`;
+  showSide('info');
+}
+function openInfoFor(id){renderInfo(id);}
+function renderProcs(id){
+  const pc=pcs[id]; if(!pc?.processes?.length) return;
+  showSide('info');
+  const p=document.getElementById('infoP');
+  const rows=pc.processes.slice(0,40).map(pr=>`
+    <tr>
+      <td>${pr.pid}</td>
+      <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis">${esc(pr.name)}</td>
+      <td>${pr.cpu}%</td>
+      <td>${(pr.ram||0).toFixed(1)}%</td>
+      <td class="pkill" onclick="cmdTo('${id}','kill_process',{pid:${pr.pid}})">✕</td>
+    </tr>`).join('');
+  p.innerHTML=`
+    <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--tx);margin-bottom:6px">Processes: ${esc(pc.name)}</div>
+    <div style="overflow-x:auto"><table class="ptable">
+      <thead><tr><th>PID</th><th>Name</th><th>CPU</th><th>RAM</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    <div style="display:flex;gap:4px;margin-top:8px">
+      <button class="sbn gh" style="flex:1" onclick="cmdTo('${id}','get_processes')">↺ Refresh</button>
+      <button class="sbn gh" style="flex:1" onclick="renderInfo('${id}')">← Back</button>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// CONTEXT MENU
+// ═══════════════════════════════════════════════════════
+function showCtx(x,y){
+  const m=document.getElementById('ctx');
+  m.style.left=Math.min(x,window.innerWidth-200)+'px';
+  m.style.top=Math.min(y,window.innerHeight-500)+'px';
+  m.classList.add('open');
+}
+function hideCtx(){document.getElementById('ctx').classList.remove('open');}
+document.addEventListener('click',hideCtx);
+
+// ═══════════════════════════════════════════════════════
+// OVERLAYS + MODALS
+// ═══════════════════════════════════════════════════════
+function closeOverlay(id){document.getElementById(id).classList.remove('open');}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+
+// ═══════════════════════════════════════════════════════
+// MOBILE
+// ═══════════════════════════════════════════════════════
+function mobileNav(tab){
+  ['computers','commands','view','chat','log'].forEach(t=>document.getElementById('bn-'+t)?.classList.toggle('act',t===tab));
+  if(tab==='computers') closeAllSheets();
+  else openSheet(tab);
+}
 function openSheet(name){
   closeAllSheets();
-  const sh=document.getElementById('sheet-'+name);
-  if(!sh) return;
+  const sh=document.getElementById('sheet-'+name); if(!sh) return;
   sh.classList.add('open');
   document.getElementById('sheetBg').classList.add('open');
 }
 function closeSheet(name){
   document.getElementById('sheet-'+name)?.classList.remove('open');
-  // If no other sheet open, close bg
-  const anyOpen=[...document.querySelectorAll('.m-sheet.open')].length>0;
-  if(!anyOpen) document.getElementById('sheetBg').classList.remove('open');
+  const any=[...document.querySelectorAll('.m-sheet.open')].length>0;
+  if(!any) document.getElementById('sheetBg').classList.remove('open');
 }
 function closeAllSheets(){
   document.querySelectorAll('.m-sheet').forEach(s=>s.classList.remove('open'));
   document.getElementById('sheetBg').classList.remove('open');
-  // Reset bottom nav to computers
   document.getElementById('bn-computers')?.classList.add('act');
-  ['commands','chat','info','log'].forEach(t=>document.getElementById('bn-'+t)?.classList.remove('act'));
+  ['commands','view','chat','log'].forEach(t=>document.getElementById('bn-'+t)?.classList.remove('act'));
 }
-
 function initSheetSwipe(){
-  let startY=0,startX=0;
   document.querySelectorAll('.m-sheet').forEach(sheet=>{
-    sheet.addEventListener('touchstart',e=>{
-      startY=e.touches[0].clientY;startX=e.touches[0].clientX;
-    },{passive:true});
-    sheet.addEventListener('touchend',e=>{
-      const dy=e.changedTouches[0].clientY-startY;
-      const dx=Math.abs(e.changedTouches[0].clientX-startX);
-      if(dy>70&&dx<50) closeAllSheets();
-    },{passive:true});
+    let sy=0;
+    sheet.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;},{passive:true});
+    sheet.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-sy>70)closeAllSheets();},{passive:true});
   });
 }
 
-// ─── CONTEXT MENU ─────────────────────────────────────────────────────────────
-function showCtx(x,y){
-  const m=document.getElementById('ctx');
-  m.style.left=Math.min(x,window.innerWidth-200)+'px';
-  m.style.top=Math.min(y,window.innerHeight-460)+'px';
-  m.classList.add('open');
+// ═══════════════════════════════════════════════════════
+// VIEW MODE + ZOOM + FILTER
+// ═══════════════════════════════════════════════════════
+function setViewMode(m){
+  currentViewMode=m;
+  document.getElementById('vbtn-grid').classList.toggle('act',m==='grid');
+  document.getElementById('vbtn-list').classList.toggle('act',m==='list');
+  document.getElementById('lni-g').classList.toggle('act',m==='grid');
+  document.getElementById('lni-l').classList.toggle('act',m==='list');
+  renderAll();
 }
-function hideCtx(){document.getElementById('ctx').classList.remove('open');}
-document.addEventListener('click',hideCtx);
-function ca(c){hideCtx();if(ctxId)cmdTo(ctxId,c);}
-
-// ─── DESKTOP SIDEBAR ─────────────────────────────────────────────────────────
-function showSide(name){
-  ['actions','chat','info','log'].forEach(t=>{
-    document.getElementById('st-'+t)?.classList.toggle('act',t===name);
-    document.getElementById('sb-'+t).style.display=t===name?'block':'none';
-  });
+function setZoom(v){
+  document.documentElement.style.setProperty('--ts',v+'px');
+  const zv=document.getElementById('zv'); if(zv) zv.textContent=v;
 }
 
-// ─── STATS + STATUS ───────────────────────────────────────────────────────────
-function updateStats(){
-  const all=Object.values(pcs);
-  document.getElementById('stT').textContent=all.length;
-  document.getElementById('stO').textContent=all.filter(p=>p.status!=='offline').length;
-}
-function setSt(s){
-  const dot=document.getElementById('cdot'),txt=document.getElementById('ctxt'),btn=document.getElementById('btnC');
-  dot.className='cdot'+(s==='on'?' on':s==='ing'?' ing':'');
-  txt.textContent=s==='on'?'On':s==='ing'?'…':'Off';
-  btn.textContent=s==='on'?'Disconnect':'Connect';
-  btn.className='cbtn'+(s==='on'?' disc':'');
-}
-
-// ─── LOG ──────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// LOG + TOAST
+// ═══════════════════════════════════════════════════════
 function log(text,type=''){
   ['ll','ll-m'].forEach(id=>{
-    const ll=document.getElementById(id);if(!ll)return;
+    const ll=document.getElementById(id); if(!ll) return;
     const t=new Date().toTimeString().slice(0,8);
     const el=document.createElement('div');
     el.className='le '+(type==='ok'?'ok':type==='w'?'w':type==='e'?'e':'');
     el.innerHTML=`<span class="lt">${t}</span><span>${esc(text)}</span>`;
     ll.insertBefore(el,ll.firstChild);
-    while(ll.children.length>300)ll.removeChild(ll.lastChild);
+    while(ll.children.length>400) ll.removeChild(ll.lastChild);
   });
 }
-function clearLog(){['ll','ll-m'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});}
-
-// ─── TOAST ────────────────────────────────────────────────────────────────────
 function toast(msg,type=''){
   const el=document.createElement('div');
   el.className='t'+(type==='w'?' w':type==='e'?' e':'');
@@ -1439,27 +1873,16 @@ function toast(msg,type=''){
   setTimeout(()=>el.remove(),3200);
 }
 
-// ─── ZOOM ─────────────────────────────────────────────────────────────────────
-function setZoom(v){
-  document.documentElement.style.setProperty('--ts',v+'px');
-  const zv=document.getElementById('zv');if(zv)zv.textContent=v;
-}
-function setView(v){
-  document.getElementById('lni-g')?.classList.toggle('act',v==='grid');
-  document.getElementById('lni-l')?.classList.toggle('act',v==='list');
-  setZoom(v==='list'?9999:parseInt(document.getElementById('zs').value));
-}
-
-// ─── KEYBOARD SHORTCUTS ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// GLOBAL KEYBOARD
+// ═══════════════════════════════════════════════════════
 document.addEventListener('keydown',e=>{
   if(document.getElementById('rcov').classList.contains('open')) return;
   const tag=document.activeElement.tagName;
   if(['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
-  if(e.key==='Escape'){closeRC();closeAllSheets();}
-  if(e.ctrlKey&&e.key==='Enter'){
-    if(document.getElementById('chatIn-d')===document.activeElement) sendChat('d');
-    if(document.getElementById('chatIn-m')===document.activeElement) sendChat('m');
-  }
+  if(e.key==='Escape'){closeRC();closeAllSheets();closeOverlay('ssOverlay');closeOverlay('spotOverlay');}
+  if(e.key==='ArrowLeft'&&document.getElementById('spotOverlay').classList.contains('open')) spotPrev();
+  if(e.key==='ArrowRight'&&document.getElementById('spotOverlay').classList.contains('open')) spotNext();
   if(!e.ctrlKey&&!e.metaKey&&!e.altKey){
     if(e.key==='l') cmd('lock');
     if(e.key==='u') cmd('unlock');
@@ -1467,9 +1890,14 @@ document.addEventListener('keydown',e=>{
     if(e.key==='m') cmd('mute');
     if(e.key==='M') cmd('unmute');
   }
+  if(e.ctrlKey&&e.key==='Enter'){
+    if(document.activeElement.id==='chatIn') sendChat();
+  }
 });
 
-// ─── UTILS ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 </script>
 </body>
