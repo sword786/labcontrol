@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LabControl Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0d0f14;
+  --surface:  #13161d;
+  --card:     #181c25;
+  --border:   #222633;
+  --border2:  #2a2f3f;
+  --accent:   #4f9eff;
+  --green:    #3ecf8e;
+  --yellow:   #f5a623;
+  --red:      #f04e4e;
+  --text:     #dce3f0;
+  --text2:    #8a93a8;
+  --text3:    #4a5168;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'IBM Plex Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ── LAYOUT ─────────────────────────────────── */
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ── TITLEBAR ───────────────────────────────── */
+.titlebar {
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+.logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.logo em { color: var(--text2); font-style: normal; }
+
+.sep { width: 1px; height: 20px; background: var(--border2); }
+
+.ws-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 380px;
+}
+.ws-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 5px 10px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  outline: none;
+  transition: border-color .2s;
+}
+.ws-input:focus { border-color: var(--accent); }
+.ws-input::placeholder { color: var(--text3); }
+
+.pass-input {
+  width: 120px;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 5px 10px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  outline: none;
+  transition: border-color .2s;
+}
+.pass-input:focus { border-color: var(--accent); }
+.pass-input::placeholder { color: var(--text3); }
+
+.btn-connect {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .15s;
+}
+.btn-connect:hover { opacity: .85; }
+.btn-connect.disconnecting { background: var(--red); }
+
+.conn-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.conn-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--text3);
+  flex-shrink: 0;
+}
+.conn-dot.on  { background: var(--green); box-shadow: 0 0 6px var(--green); animation: blink 2s infinite; }
+.conn-dot.ing { background: var(--yellow); }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.titlebar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+.stat-pill span { font-weight: 700; }
+.stat-pill.online span { color: var(--green); }
+.stat-pill.total span  { color: var(--accent); }
+
+/* ── TOOLBAR ────────────────────────────────── */
+.toolbar {
+  height: 42px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 2px;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.toolbar::-webkit-scrollbar { display: none; }
+
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 0 4px;
+  border-right: 1px solid var(--border);
+}
+.tool-group:last-child { border: none; }
+
+.tbtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s, color .12s;
+}
+.tbtn:hover { background: var(--card); color: var(--text); }
+.tbtn.active { background: rgba(79,158,255,.12); color: var(--accent); }
+.tbtn.danger:hover { background: rgba(240,78,78,.12); color: var(--red); }
+.tbtn.warn:hover   { background: rgba(245,166,35,.12); color: var(--yellow); }
+.tbtn .ico { font-size: 14px; }
+.tbtn:disabled { opacity: .35; pointer-events: none; }
+
+.sel-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  padding: 0 6px;
+}
+
+/* ── BODY ───────────────────────────────────── */
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SCREEN GRID ────────────────────────────── */
+.grid-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  background: var(--bg);
+}
+.grid-wrap::-webkit-scrollbar { width: 5px; }
+.grid-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* EMPTY STATE */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 13px;
+  text-align: center;
+  user-select: none;
+}
+.empty-state .big { font-size: 48px; opacity: .3; }
+.empty-state .hint { font-size: 11px; color: var(--text3); line-height: 1.8; }
+.empty-state .hint code { color: var(--accent); }
+
+.pc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--thumb-size, 200px), 1fr));
+  gap: 8px;
+}
+
+/* ── PC THUMB ───────────────────────────────── */
+.pc-thumb {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color .15s, transform .1s;
+  user-select: none;
+  position: relative;
+}
+.pc-thumb:hover { border-color: var(--accent); transform: translateY(-1px); }
+.pc-thumb.selected { border-color: var(--accent); background: rgba(79,158,255,.06); }
+.pc-thumb.selected .thumb-check { opacity: 1; }
+.pc-thumb.offline { opacity: .45; pointer-events: none; }
+
+/* screen preview area */
+.thumb-screen {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+.thumb-screen img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.thumb-screen-placeholder {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text3);
+  background: #0a0c10;
+}
+.thumb-screen-placeholder span { opacity: .5; }
+
+/* live badge */
+.live-badge {
+  position: absolute;
+  top: 5px; right: 5px;
+  background: var(--red);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  display: none;
+}
+.pc-thumb.streaming .live-badge { display: block; }
+
+/* hover overlay */
+.thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(79,158,255,.12);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  transition: opacity .15s;
+}
+.pc-thumb:hover .thumb-overlay { opacity: 1; }
+
+/* check */
+.thumb-check {
+  position: absolute;
+  top: 5px; left: 5px;
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 2;
+}
+.pc-thumb:hover .thumb-check { opacity: .5; }
+
+/* info bar */
+.thumb-info {
+  padding: 6px 8px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.thumb-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text3);
+}
+.thumb-dot.on   { background: var(--green); }
+.thumb-dot.idle { background: var(--yellow); }
+
+.thumb-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+.thumb-user {
+  font-size: 10px;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* cpu/ram mini bars */
+.thumb-bars {
+  padding: 0 8px 6px;
+  display: flex;
+  gap: 4px;
+}
+.mini-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mini-bar-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text3);
+  display: flex;
+  justify-content: space-between;
+}
+.mini-bar-track {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--green);
+  transition: width .5s ease;
+}
+.mini-bar-fill.mid  { background: var(--yellow); }
+.mini-bar-fill.high { background: var(--red); }
+
+/* ── SIDEBAR (RIGHT) ────────────────────────── */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.stab {
+  flex: 1;
+  text-align: center;
+  padding: 9px 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+  letter-spacing: .5px;
+}
+.stab:hover { color: var(--text2); }
+.stab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+.sidebar-body::-webkit-scrollbar { width: 4px; }
+.sidebar-body::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.sb-section { margin-bottom: 16px; }
+.sb-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 7px;
+}
+
+.sb-input, .sb-select, .sb-textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  outline: none;
+  margin-bottom: 6px;
+  transition: border-color .15s;
+}
+.sb-input:focus, .sb-select:focus, .sb-textarea:focus { border-color: var(--accent); }
+.sb-input::placeholder { color: var(--text3); }
+.sb-textarea { resize: vertical; min-height: 60px; }
+.sb-select option { background: var(--card); }
+
+.sb-btn {
+  width: 100%;
+  padding: 7px;
+  border-radius: 4px;
+  border: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .5px;
+  transition: opacity .15s;
+  margin-bottom: 4px;
+}
+.sb-btn:hover { opacity: .85; }
+.sb-btn.primary { background: var(--accent); color: #fff; }
+.sb-btn.green   { background: var(--green); color: #000; }
+.sb-btn.red     { background: var(--red); color: #fff; }
+.sb-btn.ghost   { background: var(--card); color: var(--text2); border: 1px solid var(--border2); }
+
+/* ── LOG ────────────────────────────────────── */
+.log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.log-list::-webkit-scrollbar { width: 3px; }
+.log-list::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.log-entry {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  display: flex;
+  gap: 6px;
+  padding: 4px 6px;
+  background: var(--bg);
+  border-radius: 3px;
+  border-left: 2px solid var(--border2);
+  animation: logIn .2s ease;
+}
+.log-entry.ok   { border-left-color: var(--green); }
+.log-entry.warn { border-left-color: var(--yellow); color: var(--yellow); }
+.log-entry.err  { border-left-color: var(--red); color: var(--red); }
+.log-t { color: var(--accent); flex-shrink: 0; }
+@keyframes logIn { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:none; } }
+
+/* ── VIEWER MODAL ───────────────────────────── */
+.viewer-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.92);
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+}
+.viewer-overlay.open { display: flex; }
+
+.viewer-bar {
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.viewer-title {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+.viewer-close {
+  background: var(--red);
+  border: none;
+  color: #fff;
+  width: 28px; height: 28px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.viewer-img-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 12px;
+}
+.viewer-img-wrap img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+}
+.viewer-placeholder {
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 13px;
+  text-align: center;
+  line-height: 2;
+}
+
+/* ── TOAST ──────────────────────────────────── */
+.toast-wrap {
+  position: fixed;
+  bottom: 16px; right: 16px;
+  display: flex; flex-direction: column; gap: 6px;
+  z-index: 300;
+  pointer-events: none;
+}
+.toast {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--green);
+  padding: 9px 14px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text);
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  animation: tIn .25s ease, tOut .3s ease 2.7s forwards;
+  pointer-events: none;
+}
+.toast.warn { border-left-color: var(--yellow); }
+.toast.err  { border-left-color: var(--red); }
+@keyframes tIn  { from{opacity:0;transform:translateX(12px)} to{opacity:1;transform:none} }
+@keyframes tOut { from{opacity:1} to{opacity:0} }
+
+/* ── ZOOM SLIDER ────────────────────────────── */
+.zoom-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+}
+.zoom-row input[type=range] {
+  width: 80px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.zoom-row span {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  min-width: 32px;
+}
+
+/* ── PC DETAIL (sidebar info tab) ──────────── */
+.pc-detail-empty {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  text-align: center;
+  padding: 20px 0;
+  line-height: 2;
+}
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.detail-key { color: var(--text3); font-family: var(--mono); }
+.detail-val { color: var(--text); font-family: var(--mono); font-weight: 600; }
+
+/* ── CONTEXT MENU ───────────────────────────── */
+.ctx-menu {
+  position: fixed;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 4px;
+  z-index: 400;
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  display: none;
+}
+.ctx-menu.open { display: block; }
+.ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--sans);
+  color: var(--text2);
+  cursor: pointer;
+  transition: background .1s, color .1s;
+}
+.ctx-item:hover { background: var(--border2); color: var(--text); }
+.ctx-item.danger:hover { background: rgba(240,78,78,.1); color: var(--red); }
+.ctx-sep { height: 1px; background: var(--border); margin: 3px 0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ── TITLEBAR ── -->
+<div class="titlebar">
+  <div class="logo">Lab<em>Control</em></div>
+  <div class="sep"></div>
+
+  <div class="ws-row">
+    <input class="ws-input" id="wsUrl" placeholder="wss://your-relay.onrender.com" spellcheck="false">
+    <input class="pass-input" id="wsPass" type="password" placeholder="password">
+    <button class="btn-connect" id="btnConnect" onclick="toggleConnect()">Connect</button>
+  </div>
+
+  <div class="sep"></div>
+  <div class="conn-status">
+    <div class="conn-dot" id="connDot"></div>
+    <span id="connText">Disconnected</span>
+  </div>
+
+  <div class="titlebar-right">
+    <div class="stat-pill total">Total: <span id="stTotal">0</span></div>
+    <div class="stat-pill online">Online: <span id="stOnline">0</span></div>
+  </div>
+</div>
+
+<!-- ── TOOLBAR ── -->
+<div class="toolbar">
+  <!-- Selection -->
+  <div class="tool-group">
+    <button class="tbtn" onclick="selectAll()" title="Select All"><span class="ico">☑</span> All</button>
+    <button class="tbtn" onclick="selectNone()" title="Deselect"><span class="ico">☐</span> None</button>
+    <span class="sel-label" id="selLabel"></span>
+  </div>
+
+  <!-- View -->
+  <div class="tool-group">
+    <div class="zoom-row">
+      <span class="ico" style="font-size:13px">🔲</span>
+      <input type="range" id="zoomSlider" min="120" max="320" value="200" oninput="applyZoom(this.value)">
+      <span id="zoomVal">200</span>
+    </div>
+  </div>
+
+  <!-- Screen control -->
+  <div class="tool-group">
+    <button class="tbtn" onclick="cmd('screenshot')" title="Grab screenshots"><span class="ico">📸</span> Screenshot</button>
+    <button class="tbtn" onclick="cmd('lock')" title="Lock screens"><span class="ico">🔒</span> Lock</button>
+    <button class="tbtn" onclick="cmd('unlock')" title="Unlock screens"><span class="ico">🔓</span> Unlock</button>
+    <button class="tbtn" onclick="cmd('blank_screen')" title="Black out screen"><span class="ico">⬛</span> Blank</button>
+  </div>
+
+  <!-- Input -->
+  <div class="tool-group">
+    <button class="tbtn" onclick="cmd('block_input')" title="Block keyboard+mouse"><span class="ico">🚫</span> Block Input</button>
+    <button class="tbtn" onclick="cmd('allow_input')" title="Allow keyboard+mouse"><span class="ico">✅</span> Allow Input</button>
+  </div>
+
+  <!-- Audio -->
+  <div class="tool-group">
+    <button class="tbtn" onclick="cmd('mute')" title="Mute"><span class="ico">🔇</span> Mute</button>
+    <button class="tbtn" onclick="cmd('unmute')" title="Unmute"><span class="ico">🔊</span> Unmute</button>
+  </div>
+
+  <!-- Apps -->
+  <div class="tool-group">
+    <button class="tbtn" onclick="cmd('kill_browser')" title="Kill browsers"><span class="ico">🌐</span> Kill Browser</button>
+    <button class="tbtn" onclick="openQuickRun()" title="Run command"><span class="ico">⚡</span> Run</button>
+    <button class="tbtn" onclick="openOpenUrl()" title="Open URL"><span class="ico">🔗</span> URL</button>
+  </div>
+
+  <!-- Power -->
+  <div class="tool-group">
+    <button class="tbtn warn" onclick="confirmCmd('restart','Restart selected computers?')" title="Restart"><span class="ico">↺</span> Restart</button>
+    <button class="tbtn danger" onclick="confirmCmd('shutdown','Shut down selected computers?')" title="Shutdown"><span class="ico">⏻</span> Shutdown</button>
+  </div>
+</div>
+
+<!-- ── BODY ── -->
+<div class="body">
+
+  <!-- GRID -->
+  <div class="grid-wrap" id="gridWrap">
+    <div class="empty-state" id="emptyState">
+      <div class="big">🖥</div>
+      <div>No computers connected</div>
+      <div class="hint">
+        Connect to your relay server above, then<br>
+        run the agent on student computers:<br><br>
+        <code>pip install websockets psutil Pillow</code><br>
+        <code>python agent.py --server wss://hie-z3rp.onrender.com</code>
+      </div>
+    </div>
+    <div class="pc-grid" id="pcGrid" style="display:none"></div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-tabs">
+      <div class="stab active" id="stab-actions" onclick="showSTab('actions')">ACTIONS</div>
+      <div class="stab" id="stab-info"    onclick="showSTab('info')">INFO</div>
+      <div class="stab" id="stab-log"     onclick="showSTab('log')">LOG</div>
+    </div>
+
+    <!-- ACTIONS TAB -->
+    <div class="sidebar-body" id="sbody-actions">
+
+      <div class="sb-section">
+        <div class="sb-label">Broadcast Message</div>
+        <select class="sb-select" id="msgType">
+          <option value="info">ℹ Info</option>
+          <option value="warn">⚠ Warning</option>
+          <option value="alert">🚨 Alert</option>
+        </select>
+        <input class="sb-input" id="msgTitle" placeholder="Title (optional)">
+        <textarea class="sb-textarea" id="msgBody" placeholder="Message text..."></textarea>
+        <input class="sb-input" id="msgDur" type="number" value="10" placeholder="Duration (seconds)">
+        <button class="sb-btn primary" onclick="sendMessage()">📢 Send Message</button>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">Open URL</div>
+        <input class="sb-input" id="urlVal" placeholder="https://...">
+        <select class="sb-select" id="urlBrowser">
+          <option value="default">Default browser</option>
+          <option value="chrome">Chrome</option>
+          <option value="firefox">Firefox</option>
+          <option value="edge">Edge</option>
+        </select>
+        <button class="sb-btn green" onclick="sendURL()">🚀 Open on Selected</button>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">Run Command</div>
+        <input class="sb-input" id="runCmd" placeholder="e.g. notepad.exe">
+        <select class="sb-select" id="runMode">
+          <option value="hidden">Hidden / Silent</option>
+          <option value="normal">Normal window</option>
+        </select>
+        <button class="sb-btn ghost" onclick="sendRun()">▶ Execute</button>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">File Transfer</div>
+        <input type="file" id="fileInput" style="color:var(--text2);font-family:var(--mono);font-size:10px;width:100%;margin-bottom:6px">
+        <input class="sb-input" id="fileDest" placeholder="Destination path" value="C:\Users\Public\">
+        <button class="sb-btn ghost" onclick="sendFile()">📤 Send to Selected</button>
+      </div>
+
+    </div>
+
+    <!-- INFO TAB -->
+    <div class="sidebar-body" id="sbody-info" style="display:none">
+      <div id="pcInfoPanel">
+        <div class="pc-detail-empty">Click a computer<br>to see its details</div>
+      </div>
+    </div>
+
+    <!-- LOG TAB -->
+    <div class="sidebar-body" id="sbody-log" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="sb-label" style="margin:0">Activity</div>
+        <button class="sbtn ghost" style="font-size:10px;cursor:pointer;color:var(--text3);background:none;border:none" onclick="clearLog()">Clear</button>
+      </div>
+      <div class="log-list" id="logList"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── VIEWER ── -->
+<div class="viewer-overlay" id="viewer">
+  <div class="viewer-bar">
+    <div class="viewer-title" id="viewerTitle">Screen View</div>
+    <button class="tbtn" onclick="cmd('screenshot', viewerPcId)"  title="Refresh screenshot">📸 Refresh</button>
+    <button class="tbtn" onclick="cmd('lock', viewerPcId)"        title="Lock this screen">🔒 Lock</button>
+    <button class="tbtn" onclick="cmd('unlock', viewerPcId)"      title="Unlock this screen">🔓 Unlock</button>
+    <button class="tbtn warn" onclick="cmd('restart', viewerPcId)">↺ Restart</button>
+    <button class="tbtn danger" onclick="cmd('shutdown', viewerPcId)">⏻ Shutdown</button>
+    <button class="viewer-close" onclick="closeViewer()">✕</button>
+  </div>
+  <div class="viewer-img-wrap" id="viewerImgWrap">
+    <div class="viewer-placeholder">No screenshot yet.<br>Click 📸 Refresh above.</div>
+  </div>
+</div>
+
+<!-- ── CONTEXT MENU ── -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxAction('screenshot')">📸 Screenshot</div>
+  <div class="ctx-item" onclick="ctxAction('view')">🔍 Full View</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('lock')">🔒 Lock Screen</div>
+  <div class="ctx-item" onclick="ctxAction('unlock')">🔓 Unlock Screen</div>
+  <div class="ctx-item" onclick="ctxAction('blank_screen')">⬛ Blank Screen</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('block_input')">🚫 Block Input</div>
+  <div class="ctx-item" onclick="ctxAction('allow_input')">✅ Allow Input</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('mute')">🔇 Mute</div>
+  <div class="ctx-item" onclick="ctxAction('unmute')">🔊 Unmute</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAction('kill_browser')">🌐 Kill Browser</div>
+  <div class="ctx-item" onclick="ctxAction('open_info')">ℹ Info</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="ctxAction('restart')">↺ Restart</div>
+  <div class="ctx-item danger" onclick="ctxAction('shutdown')">⏻ Shutdown</div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let ws = null;
+let pcs = {};           // id → pc object
+let selected = new Set();
+let ctxTarget = null;
+let viewerPcId = null;
+let activeSTab = 'actions';
+
+// Persist connection settings
+const S = {
+  get url()  { return localStorage.getItem('lc_url')  || 'wss://hie-z3rp.onrender.com'; },
+  get pass() { return localStorage.getItem('lc_pass') || ''; },
+  set url(v)  { localStorage.setItem('lc_url', v); },
+  set pass(v) { localStorage.setItem('lc_pass', v); }
+};
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('wsUrl').value  = S.url;
+  document.getElementById('wsPass').value = S.pass;
+  applyZoom(document.getElementById('zoomSlider').value);
+
+  // auto-connect if URL saved
+  if (S.url) connect();
+});
+
+// ═══════════════════════════════════════════════
+// WEBSOCKET
+// ═══════════════════════════════════════════════
+let reconnectTimer = null;
+
+function toggleConnect() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    disconnect();
+  } else {
+    S.url  = document.getElementById('wsUrl').value.trim();
+    S.pass = document.getElementById('wsPass').value;
+    connect();
+  }
+}
+
+function connect() {
+  if (ws) { try { ws.close(); } catch(e){} }
+
+  const url = document.getElementById('wsUrl').value.trim() || S.url;
+  if (!url) { toast('Enter server URL', 'warn'); return; }
+
+  setStatus('connecting');
+  log('Connecting to ' + url, 'warn');
+
+  try { ws = new WebSocket(url); }
+  catch(e) { setStatus('off'); toast('Invalid URL', 'err'); return; }
+
+  ws.onopen = () => {
+    setStatus('on');
+    ws.send(JSON.stringify({
+      type: 'auth', role: 'admin',
+      password: document.getElementById('wsPass').value || S.pass,
+      lab: 'LabControl'
+    }));
+    log('Connected to relay server', 'ok');
+    toast('Connected ✓');
+    clearTimeout(reconnectTimer);
+  };
+
+  ws.onclose = (e) => {
+    setStatus('off');
+    // mark all as offline
+    Object.values(pcs).forEach(p => { p.status = 'offline'; });
+    renderAll();
+    updateStats();
+    log('Disconnected — retrying in 8s', 'warn');
+    reconnectTimer = setTimeout(connect, 8000);
+  };
+
+  ws.onerror = () => { /* onclose will fire */ };
+
+  ws.onmessage = (e) => {
+    let m; try { m = JSON.parse(e.data); } catch { return; }
+    onMessage(m);
+  };
+}
+
+function disconnect() {
+  clearTimeout(reconnectTimer);
+  reconnectTimer = null;
+  if (ws) { ws.onclose = null; ws.close(); ws = null; }
+  setStatus('off');
+  log('Manually disconnected');
+}
+
+function sendWS(data) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    toast('Not connected', 'err'); return false;
+  }
+  ws.send(JSON.stringify(data));
+  return true;
+}
+
+// ═══════════════════════════════════════════════
+// MESSAGE HANDLER
+// ═══════════════════════════════════════════════
+function onMessage(m) {
+  switch (m.type) {
+
+    case 'auth_ok':
+      log('Authenticated as admin', 'ok');
+      break;
+
+    case 'auth_error':
+      toast('Wrong password!', 'err');
+      log('Auth failed: ' + m.message, 'err');
+      disconnect();
+      break;
+
+    case 'agent_list':
+      (m.agents || []).forEach(a => addPC(a));
+      renderAll(); updateStats();
+      log(`Agent list: ${m.agents.length} online`, 'ok');
+      break;
+
+    case 'agent_connected':
+      addPC(m);
+      renderAll(); updateStats();
+      log(`Connected: ${m.name}`, 'ok');
+      toast(`🖥 ${m.name} joined`);
+      break;
+
+    case 'agent_disconnected':
+      if (pcs[m.id]) {
+        const name = pcs[m.id].name;
+        pcs[m.id].status = 'offline';
+        updateCard(m.id);
+        updateStats();
+        log(`Offline: ${name}`, 'warn');
+      }
+      break;
+
+    case 'stats_update':
+      if (pcs[m.id]) {
+        pcs[m.id].cpu = m.cpu ?? 0;
+        pcs[m.id].ram = m.ram ?? 0;
+        updateCard(m.id);
+      }
+      break;
+
+    case 'idle_update':
+      if (pcs[m.id]) {
+        pcs[m.id].status = m.idle ? 'idle' : 'online';
+        updateCard(m.id);
+        updateStats();
+      }
+      break;
+
+    case 'screenshot':
+      if (pcs[m.id]) {
+        pcs[m.id].screenshot = m.data;
+        updateCard(m.id);
+        if (viewerPcId === m.id) updateViewer(m.id);
+      }
+      break;
+
+    case 'cmd_result':
+      log(`[${pcs[m.id]?.name || m.id}] ${m.cmd}: ${m.result}`, m.success ? 'ok' : 'err');
+      break;
+
+    case 'delivery_report':
+      log(`CMD ${m.cmd} → ${m.delivered}/${m.total} delivered`, 'ok');
+      break;
+
+    case 'process_list':
+      if (pcs[m.id]) {
+        pcs[m.id].processes = m.list;
+        if (activeSTab === 'info') renderInfo(m.id);
+      }
+      break;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PC MANAGEMENT
+// ═══════════════════════════════════════════════
+function addPC(a) {
+  pcs[a.id] = {
+    id: a.id,
+    name:       a.name     || a.id,
+    user:       a.user     || '—',
+    ip:         a.ip       || '—',
+    os:         a.os       || '—',
+    status:     a.status   || 'online',
+    cpu:        a.cpu      ?? 0,
+    ram:        a.ram      ?? 0,
+    screenshot: a.screenshot || null,
+    connectedAt: a.connectedAt || new Date().toISOString(),
+    processes: []
+  };
+}
+
+// ═══════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════
+function renderAll() {
+  const pcList = Object.values(pcs);
+  const grid = document.getElementById('pcGrid');
+  const empty = document.getElementById('emptyState');
+
+  if (!pcList.length) {
+    grid.style.display = 'none';
+    empty.style.display = 'flex';
+    return;
+  }
+
+  empty.style.display = 'none';
+  grid.style.display = 'grid';
+
+  // add new cards, update existing
+  pcList.forEach(pc => {
+    if (!document.getElementById('pc-' + pc.id)) {
+      grid.appendChild(buildCard(pc));
+    } else {
+      updateCard(pc.id);
+    }
+  });
+
+  // remove cards for deleted pcs
+  [...grid.children].forEach(el => {
+    const id = el.dataset.id;
+    if (id && !pcs[id]) el.remove();
+  });
+}
+
+function buildCard(pc) {
+  const div = document.createElement('div');
+  div.className = 'pc-thumb' + (pc.status === 'offline' ? ' offline' : '') + (selected.has(pc.id) ? ' selected' : '');
+  div.id = 'pc-' + pc.id;
+  div.dataset.id = pc.id;
+
+  div.innerHTML = `
+    <div class="thumb-screen" id="ts-${pc.id}">
+      ${pc.screenshot
+        ? `<img src="${pc.screenshot}" alt="">`
+        : `<div class="thumb-screen-placeholder"><span>${pc.status === 'offline' ? 'OFFLINE' : 'No screenshot'}</span></div>`}
+      <div class="live-badge">LIVE</div>
+      <div class="thumb-overlay">🔍</div>
+      <div class="thumb-check">✓</div>
+    </div>
+    <div class="thumb-info">
+      <div class="thumb-dot ${pc.status === 'online' ? 'on' : pc.status === 'idle' ? 'idle' : ''}"></div>
+      <div>
+        <div class="thumb-name">${esc(pc.name)}</div>
+        <div class="thumb-user">${esc(pc.user)}</div>
+      </div>
+    </div>
+    <div class="thumb-bars">
+      <div class="mini-bar-wrap">
+        <div class="mini-bar-label"><span>CPU</span><span id="cpuval-${pc.id}">${pc.cpu}%</span></div>
+        <div class="mini-bar-track"><div class="mini-bar-fill${pc.cpu>80?' high':pc.cpu>60?' mid':''}" id="cpubar-${pc.id}" style="width:${pc.cpu}%"></div></div>
+      </div>
+      <div class="mini-bar-wrap">
+        <div class="mini-bar-label"><span>RAM</span><span id="ramval-${pc.id}">${pc.ram}%</span></div>
+        <div class="mini-bar-track"><div class="mini-bar-fill${pc.ram>80?' high':pc.ram>60?' mid':''}" id="rambar-${pc.id}" style="width:${pc.ram}%"></div></div>
+      </div>
+    </div>
+  `;
+
+  // left click = select / open
+  div.addEventListener('click', (e) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey) {
+      toggleSelect(pc.id);
+    } else if (e.detail === 2) {
+      openViewer(pc.id);
+    } else {
+      // single click: select only this
+      selectOnly(pc.id);
+    }
+  });
+
+  // right click = context menu
+  div.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    ctxTarget = pc.id;
+    showCtx(e.clientX, e.clientY);
+  });
+
+  return div;
+}
+
+function updateCard(id) {
+  const pc = pcs[id];
+  const el = document.getElementById('pc-' + id);
+  if (!el || !pc) return;
+
+  // update classes
+  el.className = 'pc-thumb'
+    + (pc.status === 'offline' ? ' offline' : '')
+    + (selected.has(id) ? ' selected' : '');
+
+  // update screenshot
+  const ts = document.getElementById('ts-' + id);
+  if (ts) {
+    const img = ts.querySelector('img');
+    const placeholder = ts.querySelector('.thumb-screen-placeholder');
+    if (pc.screenshot) {
+      if (img) { img.src = pc.screenshot; }
+      else {
+        if (placeholder) placeholder.remove();
+        const i = document.createElement('img');
+        i.src = pc.screenshot;
+        i.alt = '';
+        ts.insertBefore(i, ts.firstChild);
+      }
+    } else {
+      if (placeholder) placeholder.querySelector('span').textContent = pc.status === 'offline' ? 'OFFLINE' : 'No screenshot';
+    }
+  }
+
+  // update status dot
+  const dot = el.querySelector('.thumb-dot');
+  if (dot) {
+    dot.className = 'thumb-dot' + (pc.status === 'online' ? ' on' : pc.status === 'idle' ? ' idle' : '');
+  }
+
+  // update bars
+  const cv = document.getElementById('cpuval-' + id);
+  const cb = document.getElementById('cpubar-' + id);
+  const rv = document.getElementById('ramval-' + id);
+  const rb = document.getElementById('rambar-' + id);
+  if (cv) cv.textContent = pc.cpu + '%';
+  if (cb) { cb.style.width = pc.cpu + '%'; cb.className = 'mini-bar-fill' + (pc.cpu>80?' high':pc.cpu>60?' mid':''); }
+  if (rv) rv.textContent = pc.ram + '%';
+  if (rb) { rb.style.width = pc.ram + '%'; rb.className = 'mini-bar-fill' + (pc.ram>80?' high':pc.ram>60?' mid':''); }
+}
+
+// ═══════════════════════════════════════════════
+// SELECTION
+// ═══════════════════════════════════════════════
+function selectOnly(id) {
+  selected.clear();
+  selected.add(id);
+  refreshSelectionUI();
+  renderInfo(id);
+}
+
+function toggleSelect(id) {
+  if (selected.has(id)) selected.delete(id);
+  else selected.add(id);
+  updateCard(id);
+  updateSelLabel();
+}
+
+function selectAll() {
+  Object.keys(pcs).forEach(id => selected.add(id));
+  refreshSelectionUI();
+}
+
+function selectNone() {
+  selected.clear();
+  refreshSelectionUI();
+}
+
+function refreshSelectionUI() {
+  Object.keys(pcs).forEach(id => updateCard(id));
+  updateSelLabel();
+}
+
+function updateSelLabel() {
+  const lbl = document.getElementById('selLabel');
+  lbl.textContent = selected.size ? `${selected.size} selected` : '';
+}
+
+function getTargets() {
+  // if any selected, use them; else use all online
+  if (selected.size > 0) return [...selected];
+  return Object.values(pcs).filter(p => p.status !== 'offline').map(p => p.id);
+}
+
+// ═══════════════════════════════════════════════
+// COMMANDS
+// ═══════════════════════════════════════════════
+function cmd(command, targetId = null) {
+  const targets = targetId ? [targetId] : getTargets();
+  if (!targets.length) { toast('No online computers to target', 'warn'); return; }
+  sendWS({ type: 'command', cmd: command, targets });
+  log(`→ ${command} (${targets.length} PC${targets.length>1?'s':''})`, 'ok');
+  toast(`${command} sent to ${targets.length} PC(s)`);
+}
+
+function confirmCmd(command, question) {
+  if (confirm(question)) cmd(command);
+}
+
+function sendMessage() {
+  const body = document.getElementById('msgBody').value.trim();
+  if (!body) { toast('Enter a message', 'warn'); return; }
+  const targets = getTargets();
+  if (!targets.length) { toast('No targets', 'warn'); return; }
+  sendWS({
+    type: 'command', cmd: 'message', targets,
+    title:    document.getElementById('msgTitle').value || 'Lab Notice',
+    message:  body,
+    msgType:  document.getElementById('msgType').value,
+    duration: parseInt(document.getElementById('msgDur').value) || 10
+  });
+  log(`Message sent: "${body.slice(0,40)}"`, 'ok');
+  toast('Message sent ✓');
+  document.getElementById('msgBody').value = '';
+}
+
+function sendURL() {
+  const url = document.getElementById('urlVal').value.trim();
+  if (!url) { toast('Enter a URL', 'warn'); return; }
+  const targets = getTargets();
+  sendWS({ type: 'command', cmd: 'open_url', targets, url, browser: document.getElementById('urlBrowser').value });
+  log(`Open URL: ${url}`, 'ok');
+  toast('URL sent ✓');
+  document.getElementById('urlVal').value = '';
+}
+
+function sendRun() {
+  const c = document.getElementById('runCmd').value.trim();
+  if (!c) { toast('Enter a command', 'warn'); return; }
+  const targets = getTargets();
+  sendWS({ type: 'command', cmd: 'exec', targets, command: c, mode: document.getElementById('runMode').value });
+  log(`Exec: ${c}`, 'ok');
+  toast('Command sent ✓');
+}
+
+function sendFile() {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) { toast('Select a file first', 'warn'); return; }
+  const targets = getTargets();
+  if (!targets.length) { toast('No targets', 'warn'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    sendWS({ type: 'command', cmd: 'file_transfer', targets, filename: file.name, path: document.getElementById('fileDest').value, data: e.target.result });
+    toast(`File sent: ${file.name} ✓`);
+    log(`File transfer: ${file.name} → ${targets.length} PCs`, 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function openQuickRun() {
+  const c = prompt('Command to run on selected computers:');
+  if (c) { document.getElementById('runCmd').value = c; sendRun(); }
+}
+
+function openOpenUrl() {
+  const u = prompt('URL to open on selected computers:');
+  if (u) { document.getElementById('urlVal').value = u; sendURL(); }
+}
+
+// ═══════════════════════════════════════════════
+// VIEWER
+// ═══════════════════════════════════════════════
+function openViewer(id) {
+  viewerPcId = id;
+  const pc = pcs[id];
+  document.getElementById('viewerTitle').textContent = `${pc.name}  —  ${pc.user}  —  ${pc.ip}`;
+  updateViewer(id);
+  document.getElementById('viewer').classList.add('open');
+  // auto-grab screenshot
+  sendWS({ type: 'command', cmd: 'screenshot', targets: [id] });
+}
+
+function updateViewer(id) {
+  if (viewerPcId !== id) return;
+  const pc = pcs[id];
+  const wrap = document.getElementById('viewerImgWrap');
+  if (pc.screenshot) {
+    wrap.innerHTML = `<img src="${pc.screenshot}" alt="Screen of ${esc(pc.name)}">`;
+  } else {
+    wrap.innerHTML = `<div class="viewer-placeholder">No screenshot yet.<br>Click 📸 Refresh above.</div>`;
+  }
+}
+
+function closeViewer() {
+  document.getElementById('viewer').classList.remove('open');
+  viewerPcId = null;
+}
+
+// close viewer with Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeViewer();
+    hideCtx();
+  }
+});
+
+// ═══════════════════════════════════════════════
+// CONTEXT MENU
+// ═══════════════════════════════════════════════
+function showCtx(x, y) {
+  const m = document.getElementById('ctxMenu');
+  m.style.left = Math.min(x, window.innerWidth - 200) + 'px';
+  m.style.top  = Math.min(y, window.innerHeight - 320) + 'px';
+  m.classList.add('open');
+}
+function hideCtx() { document.getElementById('ctxMenu').classList.remove('open'); }
+
+document.addEventListener('click', hideCtx);
+
+function ctxAction(action) {
+  hideCtx();
+  if (!ctxTarget) return;
+  if (action === 'view') { openViewer(ctxTarget); return; }
+  if (action === 'open_info') { showSTab('info'); renderInfo(ctxTarget); return; }
+  sendWS({ type: 'command', cmd: action, targets: [ctxTarget] });
+  log(`→ ${action}: ${pcs[ctxTarget]?.name}`, 'ok');
+}
+
+// ═══════════════════════════════════════════════
+// SIDEBAR TABS
+// ═══════════════════════════════════════════════
+function showSTab(name) {
+  activeSTab = name;
+  ['actions','info','log'].forEach(t => {
+    document.getElementById('stab-' + t).classList.toggle('active', t === name);
+    document.getElementById('sbody-' + t).style.display = t === name ? 'block' : 'none';
+  });
+}
+
+function renderInfo(id) {
+  const pc = pcs[id];
+  const panel = document.getElementById('pcInfoPanel');
+  if (!pc) { panel.innerHTML = '<div class="pc-detail-empty">No computer selected</div>'; return; }
+
+  const rows = [
+    ['Name',       pc.name],
+    ['User',       pc.user],
+    ['IP',         pc.ip],
+    ['OS',         pc.os],
+    ['Status',     pc.status.toUpperCase()],
+    ['CPU',        pc.cpu + '%'],
+    ['RAM',        pc.ram + '%'],
+    ['Connected',  pc.connectedAt ? new Date(pc.connectedAt).toLocaleTimeString() : '—'],
+  ];
+
+  panel.innerHTML = `
+    <div style="margin-bottom:10px">
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">${esc(pc.name)}</div>
+      <div style="font-size:11px;color:var(--text3)">${esc(pc.os)}</div>
+    </div>
+    ${rows.map(([k,v]) => `<div class="detail-row"><span class="detail-key">${k}</span><span class="detail-val">${esc(String(v))}</span></div>`).join('')}
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px">
+      <button class="sb-btn primary" onclick="openViewer('${id}')">🔍 View Screen</button>
+      <button class="sb-btn ghost" onclick="cmd('screenshot','${id}')">📸 Screenshot</button>
+      <button class="sb-btn ghost" onclick="cmd('lock','${id}')">🔒 Lock</button>
+      <button class="sb-btn red" onclick="confirmCmd('shutdown','Shutdown ${esc(pc.name)}?')">⏻ Shutdown</button>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════
+// STATS + STATUS
+// ═══════════════════════════════════════════════
+function updateStats() {
+  const all = Object.values(pcs);
+  document.getElementById('stTotal').textContent  = all.length;
+  document.getElementById('stOnline').textContent = all.filter(p => p.status !== 'offline').length;
+}
+
+function setStatus(s) {
+  const dot  = document.getElementById('connDot');
+  const text = document.getElementById('connText');
+  const btn  = document.getElementById('btnConnect');
+  dot.className  = 'conn-dot' + (s==='on'?' on':s==='connecting'?' ing':'');
+  text.textContent = s==='on' ? 'Connected' : s==='connecting' ? 'Connecting…' : 'Disconnected';
+  btn.textContent  = s==='on' ? 'Disconnect' : 'Connect';
+  btn.className    = 'btn-connect' + (s==='on' ? ' disconnecting' : '');
+}
+
+// ═══════════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════════
+function log(text, type='') {
+  const list = document.getElementById('logList');
+  const t = new Date().toTimeString().slice(0,8);
+  const el = document.createElement('div');
+  el.className = 'log-entry ' + type;
+  el.innerHTML = `<span class="log-t">${t}</span><span>${esc(text)}</span>`;
+  list.insertBefore(el, list.firstChild);
+  while (list.children.length > 300) list.removeChild(list.lastChild);
+}
+
+function clearLog() {
+  document.getElementById('logList').innerHTML = '';
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function toast(msg, type='') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.getElementById('toastWrap').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ═══════════════════════════════════════════════
+// ZOOM
+// ═══════════════════════════════════════════════
+function applyZoom(v) {
+  document.getElementById('pcGrid').style.setProperty('--thumb-size', v + 'px');
+  document.documentElement.style.setProperty('--thumb-size', v + 'px');
+  document.getElementById('zoomVal').textContent = v;
+}
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
