@@ -903,7 +903,7 @@ const LS={
 // ═══════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('wsUrl').value=LS.url||'wss://hie-z3rp.onrender.com';
-  document.getElementById('wsPass').value=LS.pass;
+  document.getElementById('wsPass').value=LS.pass||'2847';
   setZoom(190);
   initRC();
   initSheetSwipe();
@@ -1537,7 +1537,8 @@ async function toggleTalk(){
       talkActive=true;
       document.getElementById('talkBtn').textContent='🔴 Stop Talking';
       const id=document.getElementById('audioTarget').value;
-      sendWS({type:'command',cmd:'play_audio',targets:[id||...targets().slice(0,1)]});
+      const talkTargets=id?[id]:targets().slice(0,1);
+      sendWS({type:'command',cmd:'play_audio',targets:talkTargets});
       toast('🎙 Talking — agent PC will hear you');
       // In a full implementation, we'd stream mic chunks via WebSocket
     }catch(e){toast('Mic access denied','e');}
