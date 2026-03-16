@@ -1122,8 +1122,19 @@ function onMsg(m){
     case 'agent_connected':
       addPC(m);addCardLive(m.id);updateStats();
       log(`+ ${m.name}`,'ok');toast(`🖥 ${m.name} joined`); break;
+    // Agent reconnected quickly (debounced) — just refresh without disconnect toast
+    case 'agent_reconnected':
+      if(pcs[m.id]){
+        pcs[m.id].status='online';
+        pcs[m.id].user=m.user||pcs[m.id].user;
+        pcs[m.id].ip=m.ip||pcs[m.id].ip;
+        updateCardDOM(m.id);updateStats();
+      } else {
+        addPC(m);addCardLive(m.id);updateStats();
+      }
+      break;
     case 'agent_disconnected':
-      if(pcs[m.id]){pcs[m.id].status='offline';updateCardDOM(m.id);updateStats();log(`- ${pcs[m.id]?.name}`,'w');} break;
+      if(pcs[m.id]){pcs[m.id].status='offline';updateCardDOM(m.id);updateStats();log(`⚠ ${pcs[m.id]?.name} offline`,'w');} break;
     case 'stats_update':
       if(pcs[m.id]){pcs[m.id].cpu=m.cpu??0;pcs[m.id].ram=m.ram??0;updateCardDOM(m.id);} break;
     case 'idle_update':
