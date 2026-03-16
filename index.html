@@ -1608,62 +1608,89 @@ function startAudioListen(){
 }
 
 function handleAudioStreamUrl(url, ip, port, mode){
-  // Agent is running an HTTP audio server — just point <audio> at it
-  // This is the simplest most reliable method — like a radio stream
-  document.getElementById('audioStatus').textContent = `Connecting to ${ip}:${port}…`;
-  document.getElementById('audioStatus').style.color = 'var(--ylw)';
+  const pcName = pcs[audioListenId]?.name || ip;
+  log(`📞 Audio stream ready: ${url}`, 'ok');
+  toast(`📞 Audio ready from ${pcName} — click Listen`);
 
-  // Remove old player if any
-  const old = document.getElementById('lc-audio-player');
-  if(old) old.remove();
+  // ── Always show a floating audio player (works even if modal is closed) ──
+  let player = document.getElementById('lc-audio-player');
+  if(!player){
+    player = document.createElement('div');
+    player.id = 'lc-audio-player';
+    player.style.cssText = `
+      position:fixed;bottom:70px;right:14px;z-index:190;
+      background:var(--card);border:1px solid var(--b2);border-radius:10px;
+      padding:12px 14px;min-width:280px;box-shadow:0 4px 24px rgba(0,0,0,.5);
+      font-family:var(--mono);font-size:11px;
+    `;
+    document.body.appendChild(player);
+  }
 
-  const audio = document.createElement('audio');
-  audio.id = 'lc-audio-player';
-  audio.controls = true;
-  audio.autoplay = true;
-  audio.style.cssText = 'width:100%;margin-top:8px;border-radius:6px';
+  player.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="color:var(--acc);font-weight:700">📞 ${esc(pcName)}</span>
+      <button onclick="document.getElementById('lc-audio-player').remove();stopAudioListen()"
+        style="background:none;border:1px solid var(--b2);color:var(--tx3);border-radius:4px;
+               padding:2px 8px;cursor:pointer;font-size:11px">✕</button>
+    </div>
+    <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">
+      ${mode==='loopback'?'🔊 Speaker output':'🎙 Microphone'} · ${ip}:${port}
+    </div>
+    <audio id="lc-audio-el" controls autoplay
+      style="width:100%;border-radius:5px;height:36px;margin-bottom:6px"
+      src="${url}">
+    </audio>
+    <div style="display:flex;gap:6px">
+      <a href="${url}" target="_blank"
+        style="flex:1;text-align:center;padding:5px;background:rgba(79,158,255,.1);
+               border:1px solid rgba(79,158,255,.3);border-radius:4px;color:var(--acc);
+               font-size:10px;text-decoration:none;">
+        🔗 Open in tab
+      </a>
+      <button onclick="const a=document.getElementById('lc-audio-el');a.muted=!a.muted;this.textContent=a.muted?'🔈 Unmute':'🔇 Mute'"
+        style="flex:1;padding:5px;background:transparent;border:1px solid var(--b2);
+               border-radius:4px;color:var(--tx2);font-size:10px;cursor:pointer;">
+        🔇 Mute
+      </button>
+    </div>
+  `;
 
-  audio.onplay = () => {
-    document.getElementById('audioStatus').textContent =
-      `✅ Streaming: ${mode==='loopback'?'Speaker output':'Microphone'} from ${ip}`;
-    document.getElementById('audioStatus').style.color = 'var(--grn)';
-    toast('📞 Audio connected!');
-    log(`Audio stream live from ${ip}`,'ok');
+  // Wire up audio element events
+  const audioEl = document.getElementById('lc-audio-el');
+  audioEl.onplay = () => {
+    log(`✅ Audio playing from ${pcName}`,'ok');
+    toast(`✅ Hearing ${pcName}`);
   };
-  audio.onerror = (e) => {
-    document.getElementById('audioStatus').textContent =
-      `❌ Cannot connect to ${ip}:${port} — is the agent PC on the same network?`;
-    document.getElementById('audioStatus').style.color = 'var(--red)';
-    log(`Audio error: ${e.type}`,'e');
-    showAudioHelp(ip, port, url);
+  audioEl.onerror = () => {
+    const errDiv = document.createElement('div');
+    errDiv.style.cssText = 'color:var(--ylw);font-size:10px;margin-top:6px;line-height:1.6';
+    errDiv.innerHTML = `
+      ⚠️ Browser blocked direct HTTP audio.<br>
+      <b>Open this URL in a new tab instead:</b><br>
+      <a href="${url}" target="_blank" style="color:var(--acc)">${url}</a>
+    `;
+    player.appendChild(errDiv);
+    log(`Audio connect failed — try opening ${url} directly`,'w');
   };
 
-  audio.src = url;
-
-  // Insert player into modal
+  // Also update modal status if it's open
   const statusEl = document.getElementById('audioStatus');
-  statusEl.parentNode.insertBefore(audio, statusEl.nextSibling);
-
-  // Also show the URL so teacher can open in new tab if needed
-  document.getElementById('audioStatus').innerHTML =
-    `Connecting… <a href="${url}" target="_blank" style="color:var(--acc);font-size:10px">${url}</a>`;
-}
-
-function showAudioHelp(ip, port, url){
-  // Show helpful instructions if direct connection fails
-  const statusEl = document.getElementById('audioStatus');
-  statusEl.innerHTML = `
-    <div style="line-height:1.8;font-size:10px">
-      ❌ Direct connection failed.<br>
-      <b>The agent PC (${ip}) must be on the same network as you.</b><br><br>
-      Try opening this URL directly in a new tab:<br>
-      <a href="${url}" target="_blank" style="color:var(--acc)">${url}</a><br><br>
-      If that also fails:<br>
-      • College firewall may be blocking port ${port}<br>
-      • Ask IT to allow port ${port} between lab PCs<br>
-      • Or use the mic-only mode (doesn't need loopback)
-    </div>`;
-  statusEl.style.color = 'var(--ylw)';
+  if(statusEl){
+    statusEl.innerHTML = `✅ Stream ready · <a href="${url}" target="_blank"
+      style="color:var(--acc)">${url}</a>`;
+    statusEl.style.color = 'var(--grn)';
+    // Add audio player inside modal too
+    let modalAudio = document.getElementById('lc-modal-audio');
+    if(!modalAudio){
+      modalAudio = document.createElement('audio');
+      modalAudio.id = 'lc-modal-audio';
+      modalAudio.controls = true;
+      modalAudio.autoplay = true;
+      modalAudio.style.cssText = 'width:100%;margin-top:8px;border-radius:6px';
+      statusEl.parentNode.insertBefore(modalAudio, statusEl.nextSibling);
+    }
+    modalAudio.src = url;
+  }
 }
 
 function stopAudioListen(){
