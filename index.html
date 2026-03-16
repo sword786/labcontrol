@@ -942,25 +942,20 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 <div class="modal-bg" id="audioModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('audioModal')">✕</button>
-    <h3>📞 Audio Listen / Call</h3>
-    <p style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-bottom:12px;line-height:1.7">
-      Listen to what's playing on a student's speakers (WASAPI loopback).<br>
-      Requires <code style="color:var(--acc)">pip install PyAudioWPatch</code> on the agent PC.
-    </p>
-    <div class="sbl">Target Computer</div>
+    <h3>📞 Listen to Computer</h3>
+    <div class="sbl">Computer</div>
     <select class="sse" id="audioTarget"></select>
-    <div class="sbl" style="margin-top:8px">Mode</div>
+    <div class="sbl" style="margin-top:8px">Source</div>
     <select class="sse" id="audioMode">
-      <option value="loopback">🔊 Hear speakers (loopback)</option>
-      <option value="mic">🎙 Hear microphone</option>
+      <option value="loopback">🔊 Speaker output (hear what student hears)</option>
+      <option value="mic">🎙 Microphone (hear student talking)</option>
     </select>
-    <div id="audioStatus" style="font-family:var(--mono);font-size:11px;color:var(--tx3);margin:8px 0;padding:6px 8px;background:var(--bg);border-radius:4px">Status: Not connected</div>
-    <button class="sbn pur" onclick="startAudioListen()">📞 Start Listening</button>
+    <div id="audioStatus" style="font-family:var(--mono);font-size:10px;color:var(--tx3);
+      margin:8px 0;padding:8px;background:var(--bg);border-radius:5px;line-height:1.7">
+      Select a computer and click Listen.
+    </div>
+    <button class="sbn pur" id="listenBtn" onclick="startAudioListen()">📞 Listen</button>
     <button class="sbn gh" onclick="stopAudioListen()">⏹ Stop</button>
-    <div style="height:1px;background:var(--b1);margin:12px 0"></div>
-    <div class="sbl">Two-Way — Talk to Student</div>
-    <p style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-bottom:8px">Your voice plays on the student's speakers.</p>
-    <button class="sbn pur" id="talkBtn" onclick="toggleTalk()">🎙 Start Talking</button>
   </div>
 </div>
 
@@ -1167,9 +1162,7 @@ function onMsg(m){
       handleWebRTCOffer(m.sdp, m.sdp_type, m.audio_mode); break;
     case 'webrtc_ice':
       handleWebRTCIce(m.candidate); break;
-    // HTTP audio stream URL from agent
-    case 'audio_stream_url':
-      handleAudioStreamUrl(m.url, m.ip, m.port, m.mode); break;
+
   }
 }
 
@@ -1579,137 +1572,54 @@ function openWOL(){openModal('wolModal');renderWOLList();}
 // ═══════════════════════════════════════════════════════════════
 // AUDIO
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
+// AUDIO — clean simple implementation
+// Agent streams WAV chunks → relay server → dashboard Web Audio API
+// Works from anywhere on internet. No LAN required. No ports needed.
+// ═══════════════════════════════════════════════════════════════════════
+
+audioListenId = null;
+let _audioCtx     = null;
+let _audioNext    = 0;      // scheduled time of next chunk (for gapless)
+
 function openAudioModal(){
-  const sel=document.getElementById('audioTarget');
-  sel.innerHTML=Object.values(pcs).filter(p=>p.status!=='offline')
-    .map(p=>`<option value="${p.id}">${esc(p.name)} — ${esc(p.user)}</option>`).join('');
+  const sel = document.getElementById('audioTarget');
+  sel.innerHTML = Object.values(pcs)
+    .filter(p => p.status !== 'offline')
+    .map(p => `<option value="${p.id}">${esc(p.name)} — ${esc(p.user)}</option>`)
+    .join('');
+  if(!sel.innerHTML) sel.innerHTML = '<option value="">No computers online</option>';
+  document.getElementById('audioStatus').textContent = 'Select a computer and click Listen.';
+  document.getElementById('audioStatus').style.color = 'var(--tx3)';
   openModal('audioModal');
 }
-// ── WebRTC Audio (same approach as GetScreen) ─────────────────────────────
-// Agent sends WebRTC offer → dashboard answers → P2P audio stream established
-// Audio flows directly from agent speakers to your browser via WebRTC
-
-let _rtcPc = null;          // RTCPeerConnection for audio
-let _rtcAudioEl = null;     // <audio> element to play remote audio
-let _webrtcMode = false;    // true = using WebRTC, false = WebSocket fallback
 
 function startAudioListen(){
-  const id = document.getElementById('audioTarget').value;
-  if(!id){toast('Select a computer','w');return;}
-  audioListenId = id;
+  const id   = document.getElementById('audioTarget').value;
+  if(!id){ toast('Select a computer','w'); return; }
   const mode = document.getElementById('audioMode').value;
   const pc   = pcs[id];
 
-  document.getElementById('audioStatus').innerHTML =
-    `<span style="color:var(--ylw)">Connecting to ${esc(pc?.name||id)}…</span>`;
+  // Stop any existing session
+  stopAudioListen();
+  audioListenId = id;
 
-  log(`Audio listen → ${pc?.name||id} (${mode})`,'ok');
-
-  // Initialize audio context early (needs user gesture)
-  ensureAudioCtx();
-
-  // Send command — agent will stream audio chunks via WebSocket relay
-  // AND send audio_stream_url for LAN direct access
-  sendWS({type:'command', cmd:'start_audio_stream', targets:[id], mode});
-
-  // Show status after short delay
-  setTimeout(()=>{
-    const statusEl = document.getElementById('audioStatus');
-    if(statusEl && statusEl.innerHTML.includes('Connecting')){
-      statusEl.innerHTML = `
-        <div style="line-height:1.9;font-size:10px">
-          ⏳ Waiting for audio stream…<br>
-          Audio will play automatically when agent connects.<br>
-          <span style="color:var(--tx3)">Works from anywhere — streams via relay server.</span>
-        </div>`;
-    }
-  }, 3000);
-}
-
-function handleAudioStreamUrl(url, ip, port, mode){
-  const pcName = pcs[audioListenId]?.name || ip;
-  log(`📞 Audio stream ready: ${url}`, 'ok');
-  toast(`📞 Audio ready from ${pcName} — click Listen`);
-
-  // ── Always show a floating audio player (works even if modal is closed) ──
-  let player = document.getElementById('lc-audio-player');
-  if(!player){
-    player = document.createElement('div');
-    player.id = 'lc-audio-player';
-    player.style.cssText = `
-      position:fixed;bottom:70px;right:14px;z-index:190;
-      background:var(--card);border:1px solid var(--b2);border-radius:10px;
-      padding:12px 14px;min-width:280px;box-shadow:0 4px 24px rgba(0,0,0,.5);
-      font-family:var(--mono);font-size:11px;
-    `;
-    document.body.appendChild(player);
+  // Create/resume AudioContext — MUST happen inside user gesture (button click)
+  if(!_audioCtx || _audioCtx.state === 'closed'){
+    _audioCtx  = new (window.AudioContext || window.webkitAudioContext)({sampleRate: 44100});
+    _audioNext = 0;
   }
+  if(_audioCtx.state === 'suspended') _audioCtx.resume();
 
-  player.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span style="color:var(--acc);font-weight:700">📞 ${esc(pcName)}</span>
-      <button onclick="document.getElementById('lc-audio-player').remove();stopAudioListen()"
-        style="background:none;border:1px solid var(--b2);color:var(--tx3);border-radius:4px;
-               padding:2px 8px;cursor:pointer;font-size:11px">✕</button>
-    </div>
-    <div style="font-size:10px;color:var(--tx3);margin-bottom:8px">
-      ${mode==='loopback'?'🔊 Speaker output':'🎙 Microphone'} · ${ip}:${port}
-    </div>
-    <audio id="lc-audio-el" controls autoplay
-      style="width:100%;border-radius:5px;height:36px;margin-bottom:6px"
-      src="${url}">
-    </audio>
-    <div style="display:flex;gap:6px">
-      <a href="${url}" target="_blank"
-        style="flex:1;text-align:center;padding:5px;background:rgba(79,158,255,.1);
-               border:1px solid rgba(79,158,255,.3);border-radius:4px;color:var(--acc);
-               font-size:10px;text-decoration:none;">
-        🔗 Open in tab
-      </a>
-      <button onclick="const a=document.getElementById('lc-audio-el');a.muted=!a.muted;this.textContent=a.muted?'🔈 Unmute':'🔇 Mute'"
-        style="flex:1;padding:5px;background:transparent;border:1px solid var(--b2);
-               border-radius:4px;color:var(--tx2);font-size:10px;cursor:pointer;">
-        🔇 Mute
-      </button>
-    </div>
-  `;
-
-  // Wire up audio element events
-  const audioEl = document.getElementById('lc-audio-el');
-  audioEl.onplay = () => {
-    log(`✅ Audio playing from ${pcName}`,'ok');
-    toast(`✅ Hearing ${pcName}`);
-  };
-  audioEl.onerror = () => {
-    const errDiv = document.createElement('div');
-    errDiv.style.cssText = 'color:var(--ylw);font-size:10px;margin-top:6px;line-height:1.6';
-    errDiv.innerHTML = `
-      ⚠️ Browser blocked direct HTTP audio.<br>
-      <b>Open this URL in a new tab instead:</b><br>
-      <a href="${url}" target="_blank" style="color:var(--acc)">${url}</a>
-    `;
-    player.appendChild(errDiv);
-    log(`Audio connect failed — try opening ${url} directly`,'w');
-  };
-
-  // Also update modal status if it's open
   const statusEl = document.getElementById('audioStatus');
-  if(statusEl){
-    statusEl.innerHTML = `✅ Stream ready · <a href="${url}" target="_blank"
-      style="color:var(--acc)">${url}</a>`;
-    statusEl.style.color = 'var(--grn)';
-    // Add audio player inside modal too
-    let modalAudio = document.getElementById('lc-modal-audio');
-    if(!modalAudio){
-      modalAudio = document.createElement('audio');
-      modalAudio.id = 'lc-modal-audio';
-      modalAudio.controls = true;
-      modalAudio.autoplay = true;
-      modalAudio.style.cssText = 'width:100%;margin-top:8px;border-radius:6px';
-      statusEl.parentNode.insertBefore(modalAudio, statusEl.nextSibling);
-    }
-    modalAudio.src = url;
-  }
+  statusEl.style.color = 'var(--ylw)';
+  statusEl.textContent = `Connecting to ${pc?.name || id}…`;
+
+  document.getElementById('listenBtn').textContent = '🔴 Listening…';
+  document.getElementById('listenBtn').disabled = true;
+
+  log(`📞 Audio → ${pc?.name || id} (${mode})`,'ok');
+  sendWS({type:'command', cmd:'start_audio_stream', targets:[id], mode});
 }
 
 function stopAudioListen(){
@@ -1717,93 +1627,183 @@ function stopAudioListen(){
     sendWS({type:'command', cmd:'stop_audio_stream', targets:[audioListenId]});
     audioListenId = null;
   }
-  const audio = document.getElementById('lc-audio-player');
-  if(audio){ audio.pause(); audio.src=''; audio.remove(); }
-  if(_rtcPc){try{_rtcPc.close()}catch(e){}_rtcPc=null;}
-  document.getElementById('audioStatus').textContent = 'Stopped';
-  document.getElementById('audioStatus').style.color = 'var(--tx3)';
+  // Remove floating player if exists
+  document.getElementById('lc-audio-player')?.remove();
+
+  const statusEl = document.getElementById('audioStatus');
+  if(statusEl){
+    statusEl.textContent = 'Stopped.';
+    statusEl.style.color = 'var(--tx3)';
+  }
+  const btn = document.getElementById('listenBtn');
+  if(btn){ btn.textContent = '📞 Listen'; btn.disabled = false; }
   log('Audio stopped','ok');
 }
 
-// ── WebSocket audio player (works from ANYWHERE on internet) ──────────────
-// Each chunk is a complete WAV file in base64.
-// We decode it with Web Audio API and schedule it for gapless playback.
-let _wsAudioCtx = null;
-let _wsNextTime  = 0;      // when to play next chunk (for gapless scheduling)
-let _wsPlaying   = false;
+function handleAudioChunk(b64data){
+  // Called when server relays an audio_chunk from agent
+  if(!_audioCtx){ return; }
+  if(_audioCtx.state === 'suspended') _audioCtx.resume();
 
-function ensureAudioCtx(){
-  if(!_wsAudioCtx || _wsAudioCtx.state === 'closed'){
-    _wsAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    _wsNextTime  = _wsAudioCtx.currentTime;
+  try{
+    // Decode base64 → ArrayBuffer
+    const bin = atob(b64data);
+    const buf = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
+
+    // Each chunk is a complete WAV file — decode it
+    _audioCtx.decodeAudioData(buf.buffer, decoded => {
+      const src  = _audioCtx.createBufferSource();
+      src.buffer = decoded;
+      src.connect(_audioCtx.destination);
+
+      // Schedule gaplessly — play exactly when previous chunk ends
+      const now   = _audioCtx.currentTime;
+      const start = Math.max(now + 0.01, _audioNext);
+      src.start(start);
+      _audioNext = start + decoded.duration;
+
+      // Update status on first chunk
+      const statusEl = document.getElementById('audioStatus');
+      if(statusEl && statusEl.style.color !== 'var(--grn)'){
+        const pc = pcs[audioListenId];
+        statusEl.textContent = `✅ Live: ${pc?.name || audioListenId}`;
+        statusEl.style.color = 'var(--grn)';
+        const btn = document.getElementById('listenBtn');
+        if(btn){ btn.textContent = '🔴 Listening'; btn.disabled = false; }
+        toast('📞 Hearing audio!');
+        log('✅ Audio stream live','ok');
+      }
+    });
+  } catch(e){
+    // Skip bad chunks silently
   }
-  // Resume if suspended (browser autoplay policy)
-  if(_wsAudioCtx.state === 'suspended') _wsAudioCtx.resume();
-  return _wsAudioCtx;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// WAKE ON LAN
+// ═══════════════════════════════════════════════════════════════
+function sendWOL(){sendWOLMac(document.getElementById('wol-mac').value,document.getElementById('wol-name').value);}
+function sendWOLModal(){sendWOLMac(document.getElementById('wol-mac-m').value,document.getElementById('wol-name-m').value);}
+function sendWOLMac(mac,name){mac=mac.trim();if(!mac){toast('Enter MAC','w');return;}sendWS({type:'command',cmd:'wol',targets:targets(),mac,name});log(`⚡ WOL → ${mac}`,'ok');toast(`⚡ Wake → ${mac}`);}
+function saveWOLDevice(){saveWOLMac(document.getElementById('wol-mac').value,document.getElementById('wol-name').value);}
+function saveWOLModal(){saveWOLMac(document.getElementById('wol-mac-m').value,document.getElementById('wol-name-m').value);}
+function saveWOLMac(mac,name){mac=mac.trim();if(!mac)return;wolDevices=wolDevices.filter(d=>d.mac!==mac);wolDevices.push({mac,name:name||mac});localStorage.setItem('lc_wol',JSON.stringify(wolDevices));renderWOLList();toast('Saved');}
+function renderWOLList(){['wolList','wolListM'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=wolDevices.length?wolDevices.map(d=>`<div class="wol-item"><span>📟 ${esc(d.name||d.mac)}</span><span style="color:var(--tx3)">${esc(d.mac)}</span><button onclick="sendWOLMac('${d.mac}','${d.name}')">Wake</button></div>`).join(''):'<div style="font-family:var(--mono);font-size:10px;color:var(--tx3);padding:8px">No saved devices</div>';});}
+function openWOL(){openModal('wolModal');renderWOLList();}
+
+// ═══════════════════════════════════════════════════════════════
+// AUDIO
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
+// AUDIO — clean simple implementation
+// Agent streams WAV chunks → relay server → dashboard Web Audio API
+// Works from anywhere on internet. No LAN required. No ports needed.
+// ═══════════════════════════════════════════════════════════════════════
+
+audioListenId = null;
+_audioCtx     = null;
+_audioNext    = 0;      // scheduled time of next chunk (for gapless)
+
+function openAudioModal(){
+  const sel = document.getElementById('audioTarget');
+  sel.innerHTML = Object.values(pcs)
+    .filter(p => p.status !== 'offline')
+    .map(p => `<option value="${p.id}">${esc(p.name)} — ${esc(p.user)}</option>`)
+    .join('');
+  if(!sel.innerHTML) sel.innerHTML = '<option value="">No computers online</option>';
+  document.getElementById('audioStatus').textContent = 'Select a computer and click Listen.';
+  document.getElementById('audioStatus').style.color = 'var(--tx3)';
+  openModal('audioModal');
+}
+
+function startAudioListen(){
+  const id   = document.getElementById('audioTarget').value;
+  if(!id){ toast('Select a computer','w'); return; }
+  const mode = document.getElementById('audioMode').value;
+  const pc   = pcs[id];
+
+  // Stop any existing session
+  stopAudioListen();
+  audioListenId = id;
+
+  // Create/resume AudioContext — MUST happen inside user gesture (button click)
+  if(!_audioCtx || _audioCtx.state === 'closed'){
+    _audioCtx  = new (window.AudioContext || window.webkitAudioContext)({sampleRate: 44100});
+    _audioNext = 0;
+  }
+  if(_audioCtx.state === 'suspended') _audioCtx.resume();
+
+  const statusEl = document.getElementById('audioStatus');
+  statusEl.style.color = 'var(--ylw)';
+  statusEl.textContent = `Connecting to ${pc?.name || id}…`;
+
+  document.getElementById('listenBtn').textContent = '🔴 Listening…';
+  document.getElementById('listenBtn').disabled = true;
+
+  log(`📞 Audio → ${pc?.name || id} (${mode})`,'ok');
+  sendWS({type:'command', cmd:'start_audio_stream', targets:[id], mode});
+}
+
+function stopAudioListen(){
+  if(audioListenId){
+    sendWS({type:'command', cmd:'stop_audio_stream', targets:[audioListenId]});
+    audioListenId = null;
+  }
+  // Remove floating player if exists
+  document.getElementById('lc-audio-player')?.remove();
+
+  const statusEl = document.getElementById('audioStatus');
+  if(statusEl){
+    statusEl.textContent = 'Stopped.';
+    statusEl.style.color = 'var(--tx3)';
+  }
+  const btn = document.getElementById('listenBtn');
+  if(btn){ btn.textContent = '📞 Listen'; btn.disabled = false; }
+  log('Audio stopped','ok');
 }
 
 function handleAudioChunk(b64data){
-  const ctx = ensureAudioCtx();
-  try{
-    // Decode base64 to ArrayBuffer
-    const raw = atob(b64data);
-    const buf = new Uint8Array(raw.length);
-    for(let i=0;i<raw.length;i++) buf[i]=raw.charCodeAt(i);
+  // Called when server relays an audio_chunk from agent
+  if(!_audioCtx){ return; }
+  if(_audioCtx.state === 'suspended') _audioCtx.resume();
 
-    // Each chunk is a complete WAV — decode it
-    ctx.decodeAudioData(buf.buffer, (decoded) => {
-      const src = ctx.createBufferSource();
-      src.buffer  = decoded;
-      src.connect(ctx.destination);
+  try{
+    // Decode base64 → ArrayBuffer
+    const bin = atob(b64data);
+    const buf = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
+
+    // Each chunk is a complete WAV file — decode it
+    _audioCtx.decodeAudioData(buf.buffer, decoded => {
+      const src  = _audioCtx.createBufferSource();
+      src.buffer = decoded;
+      src.connect(_audioCtx.destination);
 
       // Schedule gaplessly — play exactly when previous chunk ends
-      const now       = ctx.currentTime;
-      const startTime = Math.max(now, _wsNextTime);
-      src.start(startTime);
-      _wsNextTime = startTime + decoded.duration;
-      _wsPlaying  = true;
+      const now   = _audioCtx.currentTime;
+      const start = Math.max(now + 0.01, _audioNext);
+      src.start(start);
+      _audioNext = start + decoded.duration;
 
-      // Show playing indicator once
-      if(!_wsPlaying){
-        const statusEl = document.getElementById('audioStatus');
-        if(statusEl){
-          statusEl.textContent = '✅ Streaming audio (WebSocket relay)';
-          statusEl.style.color = 'var(--grn)';
-        }
+      // Update status on first chunk
+      const statusEl = document.getElementById('audioStatus');
+      if(statusEl && statusEl.style.color !== 'var(--grn)'){
+        const pc = pcs[audioListenId];
+        statusEl.textContent = `✅ Live: ${pc?.name || audioListenId}`;
+        statusEl.style.color = 'var(--grn)';
+        const btn = document.getElementById('listenBtn');
+        if(btn){ btn.textContent = '🔴 Listening'; btn.disabled = false; }
+        toast('📞 Hearing audio!');
+        log('✅ Audio stream live','ok');
       }
-    }, (err) => {
-      // decodeAudioData failed — chunk may be malformed, skip it
-      console.warn('Audio decode error:', err);
     });
   } catch(e){
-    console.warn('Audio chunk error:', e);
+    // Skip bad chunks silently
   }
 }
 
-// WebRTC signaling handlers (for aiortc fallback)
-async function handleWebRTCOffer(sdp, sdp_type, mode){
-  try{
-    _rtcPc=new RTCPeerConnection({iceServers:[{urls:['stun:stun.l.google.com:19302']}]});
-    _rtcPc.ontrack=(e)=>{
-      if(e.track.kind==='audio'){
-        const a=document.getElementById('lc-audio-player')||document.createElement('audio');
-        a.id='lc-audio-player';a.autoplay=true;a.style.display='none';
-        document.body.appendChild(a);a.srcObject=e.streams[0];
-        document.getElementById('audioStatus').textContent='✅ WebRTC audio live';
-        document.getElementById('audioStatus').style.color='var(--grn)';
-      }
-    };
-    _rtcPc.onicecandidate=(e)=>{
-      if(e.candidate&&audioListenId)
-        sendWS({type:'webrtc_ice',targets:[audioListenId],candidate:e.candidate.toJSON()});
-    };
-    await _rtcPc.setRemoteDescription({type:sdp_type,sdp});
-    const answer=await _rtcPc.createAnswer();
-    await _rtcPc.setLocalDescription(answer);
-    sendWS({type:'webrtc_answer',targets:[audioListenId],sdp:_rtcPc.localDescription.sdp,sdp_type:_rtcPc.localDescription.type});
-  }catch(e){log(`WebRTC error: ${e}`,'e');}
-}
-async function handleWebRTCIce(c){if(_rtcPc)try{await _rtcPc.addIceCandidate(new RTCIceCandidate(c));}catch(e){}}
 
 async function toggleTalk(){
   if(talkActive){
