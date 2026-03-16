@@ -1041,6 +1041,34 @@ window.addEventListener('DOMContentLoaded',()=>{
 // ═══════════════════════════════════════════════════════════════
 // WEBSOCKET
 // ═══════════════════════════════════════════════════════════════
+// ── Heartbeat: detects frozen/silent Render disconnections ──────────────────
+// Render drops WebSocket connections silently (no close event).
+// We ping every 20s and if no pong within 5s we reconnect.
+let _hbTimer = null, _hbPongTimer = null;
+
+function startHeartbeat(){
+  stopHeartbeat();
+  _hbTimer = setInterval(()=>{
+    if(!ws || ws.readyState !== WebSocket.OPEN) return;
+    // Send ping — server echoes it back as pong
+    try{ ws.send(JSON.stringify({type:'ping'})); }catch(e){}
+    // If no response in 5s, connection is frozen — reconnect
+    _hbPongTimer = setTimeout(()=>{
+      log('Heartbeat timeout — reconnecting','w');
+      try{ ws.close(); }catch(e){}
+      ws = null;
+      setSt('off');
+      clearTimeout(reconnTimer);
+      reconnTimer = setTimeout(connect, 1000);
+    }, 5000);
+  }, 20000);
+}
+
+function stopHeartbeat(){
+  clearInterval(_hbTimer); _hbTimer = null;
+  clearTimeout(_hbPongTimer); _hbPongTimer = null;
+}
+
 function toggleConn(){
   ws&&ws.readyState===WebSocket.OPEN?disconnect():(
     LS.url=document.getElementById('wsUrl').value.trim(),
@@ -1058,15 +1086,16 @@ function connect(){
     setSt('on'); clearTimeout(reconnTimer);
     ws.send(JSON.stringify({type:'auth',role:'admin',password:document.getElementById('wsPass').value||LS.pass}));
     log('Connected ✓','ok'); toast('Connected ✓');
+    startHeartbeat();
   };
   ws.onclose=()=>{
-    setSt('off');
+    setSt('off'); stopHeartbeat();
     Object.values(pcs).forEach(p=>p.status='offline');
     renderAll(); updateStats();
-    log('Disconnected — retry 8s','w');
-    reconnTimer=setTimeout(connect,8000);
+    log('Disconnected — retry 5s','w');
+    reconnTimer=setTimeout(connect,5000);
   };
-  ws.onerror=()=>{};
+  ws.onerror=()=>{stopHeartbeat();};
   ws.onmessage=e=>{try{onMsg(JSON.parse(e.data))}catch{}};
 }
 function disconnect(){
@@ -1085,6 +1114,11 @@ function sendWS(data){
 function onMsg(m){
   switch(m.type){
     case 'auth_ok':    log('Auth ✓','ok'); break;
+    case 'pong':
+    case 'ping':
+      // Clear the pong timeout — connection is alive
+      clearTimeout(_hbPongTimer); _hbPongTimer = null;
+      break;
     case 'auth_error': toast('Wrong password','e'); disconnect(); break;
     case 'agent_list':
       pcs={};(m.agents||[]).forEach(a=>addPC(a));
@@ -1128,6 +1162,11 @@ function onMsg(m){
     case 'audio_error':
       document.getElementById('audioStatus').textContent=`❌ Error: ${m.error}`;
       document.getElementById('audioStatus').style.color='var(--red)'; break;
+    // WebRTC audio signaling (same as GetScreen)
+    case 'webrtc_offer':
+      handleWebRTCOffer(m.sdp, m.sdp_type, m.audio_mode); break;
+    case 'webrtc_ice':
+      handleWebRTCIce(m.candidate); break;
   }
 }
 
@@ -1299,7 +1338,7 @@ function selOnline(){sel.clear();Object.values(pcs).filter(p=>p.status==='online
 function selOffline(){sel.clear();Object.values(pcs).filter(p=>p.status==='offline').forEach(p=>sel.add(p.id));refreshSel();}
 function selInvert(){const all=filteredPCs().map(p=>p.id);all.forEach(id=>sel.has(id)?sel.delete(id):sel.add(id));refreshSel();}
 function selByGroup(){const n=prompt('Select computers whose name contains:');if(!n)return;sel.clear();Object.values(pcs).filter(p=>p.name.toLowerCase().includes(n.toLowerCase())).forEach(p=>sel.add(p.id));refreshSel();}
-function refreshSel(){renderAll();updateSelBar();document.getElementById('selLbl').textContent=sel.size?`${sel.size} sel`:'';document.getElementById('mob-sel-lbl').textContent=sel.size?`${sel.size} selected`:'All online';}
+function refreshSel(){renderAll();updateSelBar();const sl=document.getElementById('selLbl');if(sl)sl.textContent=sel.size?`${sel.size} sel`:'';const ml=document.getElementById('mob-sel-lbl');if(ml)ml.textContent=sel.size?`${sel.size} selected`:'All online';}
 function updateSelBar(){document.getElementById('selCount').textContent=`${sel.size} selected`;document.getElementById('selBar').style.display=sel.size?'flex':'none';}
 function targets(){return sel.size>0?[...sel]:Object.values(pcs).filter(p=>p.status!=='offline').map(p=>p.id);}
 
@@ -1543,29 +1582,142 @@ function openAudioModal(){
     .map(p=>`<option value="${p.id}">${esc(p.name)} — ${esc(p.user)}</option>`).join('');
   openModal('audioModal');
 }
+// ── WebRTC Audio (same approach as GetScreen) ─────────────────────────────
+// Agent sends WebRTC offer → dashboard answers → P2P audio stream established
+// Audio flows directly from agent speakers to your browser via WebRTC
+
+let _rtcPc = null;          // RTCPeerConnection for audio
+let _rtcAudioEl = null;     // <audio> element to play remote audio
+let _webrtcMode = false;    // true = using WebRTC, false = WebSocket fallback
+
 function startAudioListen(){
   const id=document.getElementById('audioTarget').value;
   if(!id){toast('Select a computer','w');return;}
   audioListenId=id;
   const mode=document.getElementById('audioMode').value;
-  sendWS({type:'command',cmd:'start_audio_stream',targets:[id],mode});
+
   document.getElementById('audioStatus').textContent='Requesting audio stream…';
   document.getElementById('audioStatus').style.color='var(--ylw)';
-  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   log(`Audio listen → ${pcs[id]?.name} (${mode})`,'ok');
+
+  // Close any existing WebRTC connection
+  if(_rtcPc){try{_rtcPc.close()}catch(e){}_rtcPc=null;}
+
+  // Send command to agent — it will send back a webrtc_offer
+  sendWS({type:'command',cmd:'start_audio_stream',targets:[id],mode});
 }
+
+async function handleWebRTCOffer(sdp, sdp_type, mode){
+  // Agent sent us a WebRTC offer — we answer it
+  // This establishes a direct P2P audio channel (just like GetScreen)
+  try {
+    _webrtcMode = true;
+    document.getElementById('audioStatus').textContent='WebRTC: establishing connection…';
+    document.getElementById('audioStatus').style.color='var(--ylw)';
+
+    // Create peer connection with same STUN servers as agent
+    _rtcPc = new RTCPeerConnection({
+      iceServers: [
+        {urls: ['stun:stun.l.google.com:19302']},
+        {urls: ['stun:stun1.l.google.com:19302']},
+        {urls: ['stun:stun.cloudflare.com:3478']},
+      ]
+    });
+
+    // When we get audio track from agent — play it!
+    _rtcPc.ontrack = (event) => {
+      if(event.track.kind === 'audio'){
+        if(!_rtcAudioEl){
+          _rtcAudioEl = document.createElement('audio');
+          _rtcAudioEl.autoplay = true;
+          _rtcAudioEl.style.display = 'none';
+          document.body.appendChild(_rtcAudioEl);
+        }
+        _rtcAudioEl.srcObject = event.streams[0];
+        document.getElementById('audioStatus').textContent=
+          `✅ WebRTC audio live (${mode==='loopback'?'Speaker output':'Microphone'})`;
+        document.getElementById('audioStatus').style.color='var(--grn)';
+        toast('📞 Audio connected via WebRTC!');
+        log('WebRTC audio stream active','ok');
+      }
+    };
+
+    // Send our ICE candidates to agent via WebSocket
+    _rtcPc.onicecandidate = (event) => {
+      if(event.candidate && audioListenId){
+        sendWS({
+          type: 'webrtc_ice',
+          targets: [audioListenId],
+          candidate: event.candidate.toJSON()
+        });
+      }
+    };
+
+    _rtcPc.onconnectionstatechange = () => {
+      const state = _rtcPc.connectionState;
+      log(`WebRTC audio: ${state}`,'ok');
+      if(state === 'failed' || state === 'disconnected'){
+        document.getElementById('audioStatus').textContent=`WebRTC: ${state}`;
+        document.getElementById('audioStatus').style.color='var(--red)';
+      }
+    };
+
+    // Set remote description (agent's offer)
+    await _rtcPc.setRemoteDescription({type: sdp_type, sdp: sdp});
+
+    // Create and send answer
+    const answer = await _rtcPc.createAnswer();
+    await _rtcPc.setLocalDescription(answer);
+
+    // Send answer back to agent via WebSocket signaling
+    sendWS({
+      type: 'webrtc_answer',
+      targets: [audioListenId],
+      sdp: _rtcPc.localDescription.sdp,
+      sdp_type: _rtcPc.localDescription.type
+    });
+
+    log('WebRTC answer sent to agent','ok');
+
+  } catch(e) {
+    log(`WebRTC offer error: ${e}`,'e');
+    document.getElementById('audioStatus').textContent=`WebRTC failed: ${e.message}`;
+    document.getElementById('audioStatus').style.color='var(--red)';
+    // Fallback: use chunked WebSocket audio
+    _webrtcMode = false;
+    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  }
+}
+
+async function handleWebRTCIce(candidateJson){
+  if(!_rtcPc) return;
+  try {
+    await _rtcPc.addIceCandidate(new RTCIceCandidate(candidateJson));
+  } catch(e) { log(`ICE candidate error: ${e}`,'e'); }
+}
+
 function stopAudioListen(){
-  if(audioListenId){sendWS({type:'command',cmd:'stop_audio_stream',targets:[audioListenId]});audioListenId=null;}
+  if(audioListenId){
+    sendWS({type:'command',cmd:'stop_audio_stream',targets:[audioListenId]});
+    audioListenId=null;
+  }
+  if(_rtcPc){try{_rtcPc.close()}catch(e){}_rtcPc=null;}
+  if(_rtcAudioEl){_rtcAudioEl.srcObject=null;}
+  _webrtcMode=false;
   document.getElementById('audioStatus').textContent='Stopped';
   document.getElementById('audioStatus').style.color='var(--tx3)';
+  log('Audio stopped','ok');
 }
+
+// Fallback: chunked WebSocket audio playback (when WebRTC not available)
 function handleAudioChunk(b64data){
-  if(!audioCtx) return;
+  if(_webrtcMode) return; // WebRTC handles it — ignore WS chunks
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   try{
     const raw=atob(b64data);
     const buf=new Uint8Array(raw.length);
     for(let i=0;i<raw.length;i++) buf[i]=raw.charCodeAt(i);
-    audioCtx.decodeAudioData(buf.buffer,decoded=>{
+    audioCtx.decodeAudioData(buf.buffer.slice(0),decoded=>{
       const src=audioCtx.createBufferSource();
       src.buffer=decoded;src.connect(audioCtx.destination);src.start();
     });
