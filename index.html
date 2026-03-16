@@ -1162,11 +1162,14 @@ function onMsg(m){
     case 'audio_error':
       document.getElementById('audioStatus').textContent=`❌ Error: ${m.error}`;
       document.getElementById('audioStatus').style.color='var(--red)'; break;
-    // WebRTC audio signaling (same as GetScreen)
+    // WebRTC audio signaling
     case 'webrtc_offer':
       handleWebRTCOffer(m.sdp, m.sdp_type, m.audio_mode); break;
     case 'webrtc_ice':
       handleWebRTCIce(m.candidate); break;
+    // HTTP audio stream URL from agent
+    case 'audio_stream_url':
+      handleAudioStreamUrl(m.url, m.ip, m.port, m.mode); break;
   }
 }
 
@@ -1591,127 +1594,93 @@ let _rtcAudioEl = null;     // <audio> element to play remote audio
 let _webrtcMode = false;    // true = using WebRTC, false = WebSocket fallback
 
 function startAudioListen(){
-  const id=document.getElementById('audioTarget').value;
+  const id = document.getElementById('audioTarget').value;
   if(!id){toast('Select a computer','w');return;}
-  audioListenId=id;
-  const mode=document.getElementById('audioMode').value;
+  audioListenId = id;
+  const mode = document.getElementById('audioMode').value;
 
-  document.getElementById('audioStatus').textContent='Requesting audio stream…';
-  document.getElementById('audioStatus').style.color='var(--ylw)';
+  document.getElementById('audioStatus').textContent = 'Requesting audio stream…';
+  document.getElementById('audioStatus').style.color = 'var(--ylw)';
   log(`Audio listen → ${pcs[id]?.name} (${mode})`,'ok');
 
-  // Close any existing WebRTC connection
-  if(_rtcPc){try{_rtcPc.close()}catch(e){}_rtcPc=null;}
-
-  // Send command to agent — it will send back a webrtc_offer
-  sendWS({type:'command',cmd:'start_audio_stream',targets:[id],mode});
+  // Tell agent to start streaming — it replies with audio_stream_url
+  sendWS({type:'command', cmd:'start_audio_stream', targets:[id], mode});
 }
 
-async function handleWebRTCOffer(sdp, sdp_type, mode){
-  // Agent sent us a WebRTC offer — we answer it
-  // This establishes a direct P2P audio channel (just like GetScreen)
-  try {
-    _webrtcMode = true;
-    document.getElementById('audioStatus').textContent='WebRTC: establishing connection…';
-    document.getElementById('audioStatus').style.color='var(--ylw)';
+function handleAudioStreamUrl(url, ip, port, mode){
+  // Agent is running an HTTP audio server — just point <audio> at it
+  // This is the simplest most reliable method — like a radio stream
+  document.getElementById('audioStatus').textContent = `Connecting to ${ip}:${port}…`;
+  document.getElementById('audioStatus').style.color = 'var(--ylw)';
 
-    // Create peer connection with same STUN servers as agent
-    _rtcPc = new RTCPeerConnection({
-      iceServers: [
-        {urls: ['stun:stun.l.google.com:19302']},
-        {urls: ['stun:stun1.l.google.com:19302']},
-        {urls: ['stun:stun.cloudflare.com:3478']},
-      ]
-    });
+  // Remove old player if any
+  const old = document.getElementById('lc-audio-player');
+  if(old) old.remove();
 
-    // When we get audio track from agent — play it!
-    _rtcPc.ontrack = (event) => {
-      if(event.track.kind === 'audio'){
-        if(!_rtcAudioEl){
-          _rtcAudioEl = document.createElement('audio');
-          _rtcAudioEl.autoplay = true;
-          _rtcAudioEl.style.display = 'none';
-          document.body.appendChild(_rtcAudioEl);
-        }
-        _rtcAudioEl.srcObject = event.streams[0];
-        document.getElementById('audioStatus').textContent=
-          `✅ WebRTC audio live (${mode==='loopback'?'Speaker output':'Microphone'})`;
-        document.getElementById('audioStatus').style.color='var(--grn)';
-        toast('📞 Audio connected via WebRTC!');
-        log('WebRTC audio stream active','ok');
-      }
-    };
+  const audio = document.createElement('audio');
+  audio.id = 'lc-audio-player';
+  audio.controls = true;
+  audio.autoplay = true;
+  audio.style.cssText = 'width:100%;margin-top:8px;border-radius:6px';
 
-    // Send our ICE candidates to agent via WebSocket
-    _rtcPc.onicecandidate = (event) => {
-      if(event.candidate && audioListenId){
-        sendWS({
-          type: 'webrtc_ice',
-          targets: [audioListenId],
-          candidate: event.candidate.toJSON()
-        });
-      }
-    };
+  audio.onplay = () => {
+    document.getElementById('audioStatus').textContent =
+      `✅ Streaming: ${mode==='loopback'?'Speaker output':'Microphone'} from ${ip}`;
+    document.getElementById('audioStatus').style.color = 'var(--grn)';
+    toast('📞 Audio connected!');
+    log(`Audio stream live from ${ip}`,'ok');
+  };
+  audio.onerror = (e) => {
+    document.getElementById('audioStatus').textContent =
+      `❌ Cannot connect to ${ip}:${port} — is the agent PC on the same network?`;
+    document.getElementById('audioStatus').style.color = 'var(--red)';
+    log(`Audio error: ${e.type}`,'e');
+    showAudioHelp(ip, port, url);
+  };
 
-    _rtcPc.onconnectionstatechange = () => {
-      const state = _rtcPc.connectionState;
-      log(`WebRTC audio: ${state}`,'ok');
-      if(state === 'failed' || state === 'disconnected'){
-        document.getElementById('audioStatus').textContent=`WebRTC: ${state}`;
-        document.getElementById('audioStatus').style.color='var(--red)';
-      }
-    };
+  audio.src = url;
 
-    // Set remote description (agent's offer)
-    await _rtcPc.setRemoteDescription({type: sdp_type, sdp: sdp});
+  // Insert player into modal
+  const statusEl = document.getElementById('audioStatus');
+  statusEl.parentNode.insertBefore(audio, statusEl.nextSibling);
 
-    // Create and send answer
-    const answer = await _rtcPc.createAnswer();
-    await _rtcPc.setLocalDescription(answer);
-
-    // Send answer back to agent via WebSocket signaling
-    sendWS({
-      type: 'webrtc_answer',
-      targets: [audioListenId],
-      sdp: _rtcPc.localDescription.sdp,
-      sdp_type: _rtcPc.localDescription.type
-    });
-
-    log('WebRTC answer sent to agent','ok');
-
-  } catch(e) {
-    log(`WebRTC offer error: ${e}`,'e');
-    document.getElementById('audioStatus').textContent=`WebRTC failed: ${e.message}`;
-    document.getElementById('audioStatus').style.color='var(--red)';
-    // Fallback: use chunked WebSocket audio
-    _webrtcMode = false;
-    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  }
+  // Also show the URL so teacher can open in new tab if needed
+  document.getElementById('audioStatus').innerHTML =
+    `Connecting… <a href="${url}" target="_blank" style="color:var(--acc);font-size:10px">${url}</a>`;
 }
 
-async function handleWebRTCIce(candidateJson){
-  if(!_rtcPc) return;
-  try {
-    await _rtcPc.addIceCandidate(new RTCIceCandidate(candidateJson));
-  } catch(e) { log(`ICE candidate error: ${e}`,'e'); }
+function showAudioHelp(ip, port, url){
+  // Show helpful instructions if direct connection fails
+  const statusEl = document.getElementById('audioStatus');
+  statusEl.innerHTML = `
+    <div style="line-height:1.8;font-size:10px">
+      ❌ Direct connection failed.<br>
+      <b>The agent PC (${ip}) must be on the same network as you.</b><br><br>
+      Try opening this URL directly in a new tab:<br>
+      <a href="${url}" target="_blank" style="color:var(--acc)">${url}</a><br><br>
+      If that also fails:<br>
+      • College firewall may be blocking port ${port}<br>
+      • Ask IT to allow port ${port} between lab PCs<br>
+      • Or use the mic-only mode (doesn't need loopback)
+    </div>`;
+  statusEl.style.color = 'var(--ylw)';
 }
 
 function stopAudioListen(){
   if(audioListenId){
-    sendWS({type:'command',cmd:'stop_audio_stream',targets:[audioListenId]});
-    audioListenId=null;
+    sendWS({type:'command', cmd:'stop_audio_stream', targets:[audioListenId]});
+    audioListenId = null;
   }
+  const audio = document.getElementById('lc-audio-player');
+  if(audio){ audio.pause(); audio.src=''; audio.remove(); }
   if(_rtcPc){try{_rtcPc.close()}catch(e){}_rtcPc=null;}
-  if(_rtcAudioEl){_rtcAudioEl.srcObject=null;}
-  _webrtcMode=false;
-  document.getElementById('audioStatus').textContent='Stopped';
-  document.getElementById('audioStatus').style.color='var(--tx3)';
+  document.getElementById('audioStatus').textContent = 'Stopped';
+  document.getElementById('audioStatus').style.color = 'var(--tx3)';
   log('Audio stopped','ok');
 }
 
-// Fallback: chunked WebSocket audio playback (when WebRTC not available)
+// Fallback WebSocket chunk handler (when HTTP not available)
 function handleAudioChunk(b64data){
-  if(_webrtcMode) return; // WebRTC handles it — ignore WS chunks
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   try{
     const raw=atob(b64data);
@@ -1723,6 +1692,32 @@ function handleAudioChunk(b64data){
     });
   }catch(e){}
 }
+
+// WebRTC signaling handlers (for aiortc fallback)
+async function handleWebRTCOffer(sdp, sdp_type, mode){
+  try{
+    _rtcPc=new RTCPeerConnection({iceServers:[{urls:['stun:stun.l.google.com:19302']}]});
+    _rtcPc.ontrack=(e)=>{
+      if(e.track.kind==='audio'){
+        const a=document.getElementById('lc-audio-player')||document.createElement('audio');
+        a.id='lc-audio-player';a.autoplay=true;a.style.display='none';
+        document.body.appendChild(a);a.srcObject=e.streams[0];
+        document.getElementById('audioStatus').textContent='✅ WebRTC audio live';
+        document.getElementById('audioStatus').style.color='var(--grn)';
+      }
+    };
+    _rtcPc.onicecandidate=(e)=>{
+      if(e.candidate&&audioListenId)
+        sendWS({type:'webrtc_ice',targets:[audioListenId],candidate:e.candidate.toJSON()});
+    };
+    await _rtcPc.setRemoteDescription({type:sdp_type,sdp});
+    const answer=await _rtcPc.createAnswer();
+    await _rtcPc.setLocalDescription(answer);
+    sendWS({type:'webrtc_answer',targets:[audioListenId],sdp:_rtcPc.localDescription.sdp,sdp_type:_rtcPc.localDescription.type});
+  }catch(e){log(`WebRTC error: ${e}`,'e');}
+}
+async function handleWebRTCIce(c){if(_rtcPc)try{await _rtcPc.addIceCandidate(new RTCIceCandidate(c));}catch(e){}}
+
 async function toggleTalk(){
   if(talkActive){
     talkActive=false;
